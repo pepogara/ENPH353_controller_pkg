@@ -14,13 +14,23 @@ rate = rospy.Rate(2)
 move = Twist()
 move.linear.x = 1
 move.angular.z = 0
+stopMove = Twist()
+stopMove.linear.x = 0
+stopMove.angular.z = 0
 
 while rospy.get_time() - startTime < 1:
     rate.sleep()
 
 pub2.publish("a,a,0,a")
 
+stopped = False
+
 while not rospy.is_shutdown():
 
-    pub.publish(move)
-    rate.sleep()
+    if not stopped:
+        pub.publish(move)
+        if rospy.get_time() - startTime > 3:
+            pub.publish(stopMove)
+            pub2.publish("a,a,-1,a")
+            stopped = True
+        rate.sleep()
