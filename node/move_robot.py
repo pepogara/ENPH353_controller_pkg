@@ -25,7 +25,7 @@ class Controller:
         """
         #rospy.init_node('controller_node', anonymous=True)
 
-        # self.image_sub = rospy.Subscriber('/R1/pi_camera/image_raw topic', Image, self.frame_callback, queue_size=10)
+        self.camera = CameraSubscriber()
         self.move_pub = MovePublisher()
         self.score_pub = ScorePublisher()
 
@@ -49,10 +49,14 @@ class Controller:
         start_time = rospy.get_time()
 
         while rospy.get_time() - start_time < 3 and not rospy.is_shutdown():
+            cv2.namedWindow("frame", cv2.WINDOW_AUTOSIZE)
+            cv2.imshow("frame", self.camera.get_frame())
+            cv2.waitKey(1)
             # Move the robot for 2 seconds
             self.move_pub.move_publisher(0.0)
         
         # Stop the robot movement
+        cv2.destroyAllWindows()
         self.stop_robot()
 
     def stop_robot(self):
@@ -169,7 +173,7 @@ class MovePublisher:
             None
         """
         move = Twist()
-        move.linear.x = 1
+        move.linear.x = 0.5
         move.angular.z = z
 
         self.move_pub.publish(move)
@@ -245,13 +249,6 @@ def main(args):
     Returns:
         None
     """
-    rospy.init_node('controller_node', anonymous=True)
-
-    camera = CameraSubscriber()
-    cv2.namedWindow("frame", cv2.WINDOW_AUTOSIZE)
-    cv2.imshow("frame", camera.get_frame())
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
 
     try:
         cntrl_pkg = Controller()
@@ -261,4 +258,5 @@ def main(args):
         pass
 
 if __name__ == '__main__':
+    rospy.init_node('controller_node', anonymous=True)
     main(sys.argv)
