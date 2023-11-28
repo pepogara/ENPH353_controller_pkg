@@ -23,7 +23,7 @@ class Controller:
         Returns:
             None
         """
-        rospy.init_node('controller_node', anonymous=True)
+        #rospy.init_node('controller_node', anonymous=True)
 
         # self.image_sub = rospy.Subscriber('/R1/pi_camera/image_raw topic', Image, self.frame_callback, queue_size=10)
         self.move_pub = MovePublisher()
@@ -68,6 +68,77 @@ class Controller:
 
         """
         rospy.spin()
+
+class CameraSubscriber:
+    """
+    This class represents a subscriber for the camera.
+    
+    Attributes: 
+        cam_sub (rospy.Subscriber): Subscriber for the camera.
+        frame (Image): Image frame from the camera.
+    """
+
+    def __init__(self):
+        """
+        Initializes the CameraSubscriber object.
+
+        This constructor sets up the subscriber for the camera.
+        """
+        self.cam_sub = rospy.Subscriber('/R1/pi_camera/image_raw', Image, self.frame_callback, queue_size=10)
+        self.frame = None
+
+    def frame_callback(self, data):
+        """
+        Callback function for the camera subscriber.
+
+        Parameters:
+            data (Image): Image frame from the camera.
+
+        Returns:
+            None
+        """
+        try:
+            self.frame = CvBridge().imgmsg_to_cv2(data, "bgr8")
+        except CvBridgeError as e:
+            print(e)
+    
+    def get_frame(self):
+        """
+        Returns the image frame from the camera.
+
+        Parameters:
+            None
+
+        Returns:
+            frame (Image): Image frame from the camera.
+        """
+        return self.frame
+    
+    def get_frame_size(self):
+        """
+        Returns the size of the image frame from the camera.
+
+        Parameters:
+            None
+
+        Returns:
+            frame_size (tuple): Size of the image frame from the camera.
+        """
+        frame_size = self.frame.shape
+        return frame_size
+    
+    def get_frame_center(self):
+        """
+        Returns the center of the image frame from the camera.
+
+        Parameters:
+            None
+
+        Returns:
+            frame_center (tuple): Center of the image frame from the camera.
+        """
+        frame_center = (self.frame.shape[1]//2, self.frame.shape[0]//2)
+        return frame_center
 
 class MovePublisher:
     """
@@ -174,6 +245,14 @@ def main(args):
     Returns:
         None
     """
+    rospy.init_node('controller_node', anonymous=True)
+
+    camera = CameraSubscriber()
+    cv2.namedWindow("frame", cv2.WINDOW_AUTOSIZE)
+    cv2.imshow("frame", camera.get_frame())
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+
     try:
         cntrl_pkg = Controller()
         cntrl_pkg.spin()
