@@ -4,4 +4,9 @@
 	      name="controller"
 	      output="screen">
 	</node>
+	<node pkg="controller_pkg"
+	      type="image_treating.py"
+	      name="image_treating"
+	      output="screen">
+	</node>
 </launch>

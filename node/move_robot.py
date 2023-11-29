@@ -7,6 +7,7 @@ from sensor_msgs.msg import Image
 import sys
 import cv2
 from cv_bridge import CvBridge, CvBridgeError
+import image_treating as imgt
 
 class Controller:
     """
@@ -24,7 +25,7 @@ class Controller:
             None
         """
         #rospy.init_node('controller_node', anonymous=True)
-
+        
         self.camera = CameraSubscriber()
         self.move_pub = MovePublisher()
         self.score_pub = ScorePublisher()
@@ -38,7 +39,6 @@ class Controller:
         Callback function to start the timer after one second.
         """
         self.score_pub.start()
-        
         # Move the robot after starting the timer
         self.move_robot()
 
@@ -49,14 +49,14 @@ class Controller:
         start_time = rospy.get_time()
 
         while rospy.get_time() - start_time < 3 and not rospy.is_shutdown():
-            cv2.namedWindow("frame", cv2.WINDOW_AUTOSIZE)
-            cv2.imshow("frame", self.camera.get_frame())
+            hsv = imgt.HSV(self.camera.get_frame())
+            cv2.namedWindow("hsv frame", cv2.WINDOW_AUTOSIZE)
+            cv2.imshow("frame", hsv)
             cv2.waitKey(1)
             # Move the robot for 2 seconds
             self.move_pub.move_publisher(0.0)
         
         # Stop the robot movement
-        cv2.destroyAllWindows()
         self.stop_robot()
 
     def stop_robot(self):
@@ -116,7 +116,7 @@ class CameraSubscriber:
         Returns:
             frame (Image): Image frame from the camera.
         """
-        return self.frame
+        return self.frame.copy() if self.frame is not None else None
     
     def get_frame_size(self):
         """
