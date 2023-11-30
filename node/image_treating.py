@@ -4,8 +4,15 @@ import numpy as np
 import cv2 as cv
 import time
 
-def HSV(img):
 
+def HSV(img):
+    """
+    Function to apply mask to image to isolate hints
+
+    Parameters: img - image to be masked
+
+    Returns: mask - masked image
+    """
 
     img = cv.medianBlur(img,5)
 
@@ -85,6 +92,16 @@ def HSV(img):
     # cv.destroyAllWindows()
     
 def homography(hsv, img):
+    """"
+    Function to apply perspective transform to image
+    to isolate hint
+
+    Parameters: hsv - masked image used to get the transform 
+                img - original image that transform will be applied to
+
+    Returns: transformed_img - full color image with perspective transform applied
+             None - if no hint is found, or if the hint is too small
+    """
 
     # Find contours in the HSV image
     # RETR_CCOMP retrieves all contours and organizes them into a two level heirarchy
