@@ -47,12 +47,16 @@ class Controller:
         Function to move the robot for about 2 seconds.
         """
         start_time = rospy.get_time()
-
-        while rospy.get_time() - start_time < 3 and not rospy.is_shutdown():
-            hsv = imgt.HSV(self.camera.get_frame())
-            cv2.namedWindow("hsv frame", cv2.WINDOW_AUTOSIZE)
-            cv2.imshow("frame", hsv)
-            cv2.waitKey(1)
+        while rospy.get_time() - start_time < 8 and not rospy.is_shutdown():
+            img = self.camera.get_frame()
+            hsv = imgt.HSV(img)
+            hint = imgt.homography(hsv, img)
+            if hint is not None:
+                cv2.namedWindow("hint_frame", cv2.WINDOW_AUTOSIZE)
+                cv2.imshow("hint_frame", hint)
+                cv2.waitKey(1)
+            else:
+                cv2.destroyAllWindows()
             # Move the robot for 2 seconds
             self.move_pub.move_publisher(0.0)
         
