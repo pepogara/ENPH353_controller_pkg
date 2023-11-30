@@ -58,9 +58,10 @@ class Controller:
             else:
                 cv2.destroyAllWindows()
             # Move the robot for 2 seconds
-            self.move_pub.move_publisher(0.0)
+            # self.move_pub.move_publisher(0.0)
         
         # Stop the robot movement
+        cv2.imwrite("bright_hint.jpg", hint)
         self.stop_robot()
 
     def stop_robot(self):

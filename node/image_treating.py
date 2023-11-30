@@ -118,7 +118,7 @@ def homography(hsv, img):
         return None
     
     # ignores contours that are too small
-    if cv.contourArea(largest_contour) < 2000:
+    if cv.contourArea(largest_contour) < 8000:
         return None
 
     # Approximate the largest contour with a polygon
@@ -129,8 +129,8 @@ def homography(hsv, img):
     corner_points = [point[0] for point in approx_polygon]
 
     """Untested code for if corner_points is not 4"""
-    if len(corner_points) != 4:
-        epsilon = (0.1 + .02*(len(corner_points)- 4)) * cv.arcLength(largest_contour, True)
+    while len(corner_points) != 4:
+        epsilon = (0.1 + .01*(len(corner_points)- 4)) * cv.arcLength(largest_contour, True)
         approx_polygon = cv.approxPolyDP(largest_contour, epsilon, True)
 
         # Extract the corner points from the approximated polygon
@@ -154,8 +154,30 @@ def homography(hsv, img):
     # Apply the same perspective transform to the img
     transformed_img = cv.warpPerspective(img, matrix, (img.shape[1], img.shape[0]))
 
-    return transformed_img
+    return brighten(transformed_img)
     # return cv.drawContours(img, [largest_contour], -1, (0, 255, 0), 1)
     # for point in corner_points:
     #     cv.circle(img, point, 5, (0, 0, 255), -1)
     # return img
+
+def brighten(img, value=255):
+    """
+    Function to brighten image
+    Code from: https://stackoverflow.com/questions/32609098/how-to-fast-change-image-brightness-with-python-opencv
+
+    Parameters: img - image to be brightened
+                value - value to brighten image by, default is 255 (max brightness)
+
+    Returns: img - brightened image
+    """
+
+    hsv = cv.cvtColor(img, cv.COLOR_BGR2HSV)
+    h, s, v = cv.split(hsv)
+
+    lim = 255 - value
+    v[v > lim] = 255
+    v[v <= lim] += value
+
+    final_hsv = cv.merge((h, s, v))
+    img = cv.cvtColor(final_hsv, cv.COLOR_HSV2BGR)
+    return img 
