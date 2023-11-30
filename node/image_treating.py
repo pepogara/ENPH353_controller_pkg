@@ -106,10 +106,10 @@ def homography(hsv, img):
     # Find contours in the HSV image
     # RETR_CCOMP retrieves all contours and organizes them into a two level heirarchy
     # CHAIN_APPROX_SIMPLE stores only the corner points of the contour
-    contours, heirarchy = cv.findContours(hsv, cv.RETR_CCOMP, cv.CHAIN_APPROX_SIMPLE)
+    contours, hierarchy = cv.findContours(hsv, cv.RETR_CCOMP, cv.CHAIN_APPROX_SIMPLE)
 
     # Finds all inner contours (holes)
-    inner_contours = [contours[i] for i in range(len(contours)) if heirarchy[0][i][3] >= 0]
+    inner_contours = [contours[i] for i in range(len(contours)) if hierarchy[0][i][3] >= 0]
     
     try:
         # Find the largest inner contour (the white rectangular frame, others are noise) if it exists
