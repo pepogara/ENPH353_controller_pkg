@@ -2,48 +2,42 @@
 
 import rospy
 from std_msgs.msg import String
-from sensor_msgs.msg import Image
-import sys
-import cv2
-from cv_bridge import CvBridge, CvBridgeError
-
 
 class ScorePublisher:
-    """
-    This class represents a publisher for the score.
+    """!
+    @brief      This class represents a publisher for the score.
 
     Attributes:
         score_pub (rospy.Publisher): Publisher for the score.
     """
 
     def __init__(self):
-        """
-        Initializes the ScorePublisher object.
+        """!
+        @brief      Initializes the ScorePublisher object.
 
         This constructor sets up the publisher for the score.
         """
         self.score_pub = rospy.Publisher('/score_tracker', String, queue_size=1)
 
+        self.TEAM_NAME = "MAUPEPO"
+        self.TEAM_PASSWORD = "password"
+
     def clue_publisher(self, score):
-        """
-        Publishes the score to the score_tracker topic.
+        """!
+        @brief      Publishes the score to the score_tracker topic.
 
-        Parameters:
-            score (int): Score to be published.
-
-        Returns:
-            None
+        @param      score (int): Score to be published.
         """
         pass
 
     def start(self):
+        """!
+        @brief      Starts the timer for the simulation.
         """
-        Starts the timer for the simulation.
-        """
-        self.score_pub.publish("a,a,0,a")
+        self.score_pub.publish(F"{self.TEAM_NAME},{self.TEAM_PASSWORD},0,")
         
     def stop(self):
+        """!
+        @brief      Stops the timer for the simulation.
         """
-        Stops the timer for the simulation.
-        """
-        self.score_pub.publish("a,a,-1,a")
+        self.score_pub.publish(F"{self.TEAM_NAME},{self.TEAM_PASSWORD},-1,")
