@@ -15,7 +15,7 @@ class ImagePublisher:
 
         This constructor sets up the publisher for the image.
         """
-        self.image_pub = rospy.Publisher("image_topic_2", Image)
+        self.image_pub = rospy.Publisher("image_topic_2", Image, queue_size=10)
         self.bridge = CvBridge()
 
     def publish(self, image):

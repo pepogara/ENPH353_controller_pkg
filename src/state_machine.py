@@ -1,18 +1,21 @@
 #! /usr/bin/env python3
 
 import rospy
-import sys
 import cv2
 
-from move_publisher import MovePublisher 
-from score_publisher import ScorePublisher
-from image_subscriber import ImageSubscriber
-from image_publisher import ImagePublisher
+import sys
 
-# from controller_pkg.state_machine.states.road import RoadDrivingState
+from utils.move_publisher import MovePublisher 
+from utils.score_publisher import ScorePublisher
+from utils.image_subscriber import ImageSubscriber
+from utils.image_publisher import ImagePublisher
+
+
+from states.road import RoadDrivingState
+
 # from controller_pkg.state_machine.states.idle import IdleState
 
-import image_treaiting as imgt
+import utils.image_treaiting as imgt
 
 
 ###
@@ -70,25 +73,8 @@ class StateMachine():
 
             elif self.current_state == "road":
 
-                start_time = rospy.get_time()
-                while rospy.get_time() - start_time < 8 and not rospy.is_shutdown():
-                    img = self.camera.get_frame()
-
-                    self.debug.publish(img)
-
-                    hsv = imgt.HSV(img)
-                    hint = imgt.homography(hsv, img)
-                    if hint is not None:
-                        cv2.namedWindow("hint_frame", cv2.WINDOW_AUTOSIZE)
-                        cv2.imshow("hint_frame", hint)
-                        cv2.waitKey(1)
-                    else:
-                        cv2.destroyAllWindows()
-                    # Move the robot for 2 seconds
-                    # self.move_pub.move_publisher(0.0)
-                
-                # Stop the robot movement
-                self.move_pub.stop_publisher()
+                road = RoadDrivingState(self)
+                road.execute()
 
             elif self.current_state == "respawn":
                 pass

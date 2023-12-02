@@ -2,20 +2,15 @@
 
 import numpy as np
 import cv2 as cv
-import time
-
-
-def __init__(self):
-    pass
 
 
 def HSV(img):
-    """
-    Function to apply mask to image to isolate hints
+    """!
+    @brief      Function to apply mask to image to isolate hints
 
-    Parameters: img - image to be masked
+    @param      img - image to be masked
 
-    Returns: mask - masked image
+    @return     mask - masked image
     """
 
     img = cv.medianBlur(img,5)
@@ -96,15 +91,14 @@ def HSV(img):
     # cv.destroyAllWindows()
     
 def homography(hsv, img):
-    """"
-    Function to apply perspective transform to image
-    to isolate hint
+    """!
+    @brief      Function to apply perspective transform to image to isolate hint
 
-    Parameters: hsv - masked image used to get the transform 
-                img - original image that transform will be applied to
+    @param      hsv - masked image used to get the transform 
+    @param      img - original image that transform will be applied to
 
-    Returns: transformed_img - full color image with perspective transform applied
-             None - if no hint is found, or if the hint is too small
+    @return     transformed_img - full color image with perspective transform applied
+                None - if no hint is found, or if the hint is too small
     """
 
     # Find contours in the HSV image
@@ -158,21 +152,22 @@ def homography(hsv, img):
     # Apply the same perspective transform to the img
     transformed_img = cv.warpPerspective(img, matrix, (img.shape[1], img.shape[0]))
 
-    return brighten(transformed_img)
+    return brighten(transformed_img, 200)
     # return cv.drawContours(img, [largest_contour], -1, (0, 255, 0), 1)
     # for point in corner_points:
     #     cv.circle(img, point, 5, (0, 0, 255), -1)
     # return img
 
 def brighten(img, value=255):
-    """
-    Function to brighten image
+    """!
+    @brief      Function to brighten image
+    
     Code from: https://stackoverflow.com/questions/32609098/how-to-fast-change-image-brightness-with-python-opencv
 
-    Parameters: img - image to be brightened
-                value - value to brighten image by, default is 255 (max brightness)
+    @param      img - image to be brightened
+    @param      value - value to brighten image by, default is 255 (max brightness)
 
-    Returns: img - brightened image
+    @return     img - brightened image
     """
 
     hsv = cv.cvtColor(img, cv.COLOR_BGR2HSV)

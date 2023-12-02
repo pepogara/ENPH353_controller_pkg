@@ -22,13 +22,14 @@ class ScorePublisher:
         self.TEAM_NAME = "MAUPEPO"
         self.TEAM_PASSWORD = "password"
 
-    def clue_publisher(self, score):
+    def clue_publisher(self, clue, score):
         """!
         @brief      Publishes the score to the score_tracker topic.
 
-        @param      score (int): Score to be published.
+        @param      clue (string): Clue to be published.
+        @param      score (int): Clue number to be published.
         """
-        pass
+        self.score_pub.publish(f"{self.TEAM_NAME},{self.TEAM_PASSWORD},{score},{clue}")
 
     def start(self):
         """!
