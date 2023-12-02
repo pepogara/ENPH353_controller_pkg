@@ -1,7 +1,7 @@
 <launch>
 	<node pkg="controller_pkg"
-	      type="move_robot.py"
-	      name="controller"
+	      type="state_machine.py"
+	      name="controller_node"
 	      output="screen">
 	</node>
 </launch>
