@@ -1,3 +1,5 @@
+#! /usr/bin/env python3
+
 import cv2
 import rospy
 from sensor_msgs.msg import Image
@@ -7,7 +9,7 @@ class ImageSubscriber():
     """!
     @brief      Image subscriber class for the robot.
     """
-    
+
     def __init__(self):
         """!
         @brief      Constructs a new instance.

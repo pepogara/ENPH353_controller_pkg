@@ -1,7 +1,7 @@
 <launch>
 	<node pkg="controller_pkg"
 	      type="state_machine.py"
-	      name="controller_node"
+	      name="controller"
 	      output="screen">
 	</node>
 </launch>

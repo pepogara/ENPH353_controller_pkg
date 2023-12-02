@@ -8,7 +8,7 @@ import sys
 import cv2
 from cv_bridge import CvBridge, CvBridgeError
 
-from controller_pkg.node.move_publisher import MovePublisher
+from controller_pkg.node.move_publisher import MovePublisher 
 from controller_pkg.node.score_publisher import ScorePublisher
 from controller_pkg.node.image_subscriber import ImageSubscriber
 

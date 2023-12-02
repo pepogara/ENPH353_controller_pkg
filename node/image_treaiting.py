@@ -5,6 +5,10 @@ import cv2 as cv
 import time
 
 
+def __init__(self):
+    pass
+
+
 def HSV(img):
     """
     Function to apply mask to image to isolate hints
