@@ -1,8 +1,6 @@
 #! /usr/bin/env python3
 
 import rospy
-import cv2
-
 import sys
 
 from utils.move_publisher import MovePublisher 
@@ -10,17 +8,7 @@ from utils.score_publisher import ScorePublisher
 from utils.image_subscriber import ImageSubscriber
 from utils.image_publisher import ImagePublisher
 
-
 from states.road import RoadDrivingState
-
-# from controller_pkg.state_machine.states.idle import IdleState
-
-import utils.image_treaiting as imgt
-
-
-###
-#THIS SCRIPT SHOULD BE IN THE STATE MACHINE FOLDER BUT IMPORTS ARE NOT WORKING RN
-###
 
 class StateMachine():
     """!
