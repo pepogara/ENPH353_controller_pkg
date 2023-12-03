@@ -2,6 +2,7 @@
 
 import numpy as np
 import cv2 as cv
+import rospy
 
 
 def HSV(img):
@@ -127,10 +128,12 @@ def homography(hsv, img):
     corner_points = [point[0] for point in approx_polygon]
 
     """Untested code for if corner_points is not 4"""
+    startTime = rospy.get_time()
     while len(corner_points) != 4:
+        if rospy.get_time() - startTime > 0.1:
+            return None
         epsilon = (0.1 + .01*(len(corner_points)- 4)) * cv.arcLength(largest_contour, True)
         approx_polygon = cv.approxPolyDP(largest_contour, epsilon, True)
-
         # Extract the corner points from the approximated polygon
         corner_points = [point[0] for point in approx_polygon]
     
