@@ -18,6 +18,9 @@ class RoadDrivingState:
         """
         self.state_machine = state_machine
         self.current_substate = "follow_road"
+        self.past_hint = None
+        self.past_area = 0
+        self.hint_found = False
 
     # def execute(self, controller):
     #     """!

@@ -34,6 +34,7 @@ class StateMachine():
         self.camera = ImageSubscriber()
         self.debug = ImagePublisher()
 
+        self.road = RoadDrivingState(self)
         rospy.Timer(rospy.Duration(1), self.execute, oneshot=True)
         rospy.on_shutdown(self.on_shutdown)
     
@@ -61,7 +62,6 @@ class StateMachine():
 
             elif self.current_state == "road":
 
-                road = RoadDrivingState(self)
                 road.execute()
 
             elif self.current_state == "respawn":
