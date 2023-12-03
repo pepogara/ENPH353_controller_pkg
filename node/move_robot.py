@@ -47,7 +47,8 @@ class Controller:
         Function to move the robot for about 2 seconds.
         """
         start_time = rospy.get_time()
-        while rospy.get_time() - start_time < 8 and not rospy.is_shutdown():
+        while rospy.get_time() - start_time < 100 and not rospy.is_shutdown():
+            rospy.timer.sleep(0.1)
             img = self.camera.get_frame()
             hsv = imgt.HSV(img)
             hint = imgt.homography(hsv, img)
@@ -61,7 +62,6 @@ class Controller:
             # self.move_pub.move_publisher(0.0)
         
         # Stop the robot movement
-        cv2.imwrite("bright_hint.jpg", hint)
         self.stop_robot()
 
     def stop_robot(self):

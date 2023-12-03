@@ -115,10 +115,12 @@ def homography(hsv, img):
         # Find the largest inner contour (the white rectangular frame, others are noise) if it exists
         largest_contour = max(inner_contours, key=cv.contourArea)
     except:
-        return None
+        print("No hint found")
+        return img
     
     # ignores contours that are too small
     if cv.contourArea(largest_contour) < 8000:
+        print("Hint too small")
         return None
 
     # Approximate the largest contour with a polygon
@@ -154,8 +156,8 @@ def homography(hsv, img):
     # Apply the same perspective transform to the img
     transformed_img = cv.warpPerspective(img, matrix, (img.shape[1], img.shape[0]))
 
-    return brighten(transformed_img)
-    # return cv.drawContours(img, [largest_contour], -1, (0, 255, 0), 1)
+    # return brighten(transformed_img)
+    return cv.drawContours(img, [largest_contour], -1, (0, 255, 0), 1)
     # for point in corner_points:
     #     cv.circle(img, point, 5, (0, 0, 255), -1)
     # return img
