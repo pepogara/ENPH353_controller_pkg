@@ -117,7 +117,7 @@ def homography(hsv, img):
         return None
     
     # ignores contours that are too small
-    if cv.contourArea(largest_contour) < 8000:
+    if cv.contourArea(largest_contour) < 11000:
         return None
 
     # Approximate the largest contour with a polygon

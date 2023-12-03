@@ -21,7 +21,12 @@ class RoadDrivingState:
         """
         self.state_machine = state_machine
         self.current_substate = "follow_road"
+        self.past_hint = None
+        self.past_area = 0
+        self.hint_found = False
+
         self.model = ks.models.load_model("/home/fizzer/ros_ws/src/controller_pkg/nn_models/signNN_3.h5")
+
 
     def transition_to_substate(self, substate):
         """!
@@ -35,14 +40,40 @@ class RoadDrivingState:
         @brief      Executes the given controller.
         """
         if self.current_substate == "follow_road":
+
             img = self.state_machine.camera.get_frame()
 
-            # self.state_machine.debug.publish(img)
-
             hsv = imgt.HSV(img)
-            hint = imgt.homography(hsv, img)
-
+            hint, area = imgt.homography(hsv, img)
             if hint is not None:
+                if (self.hint_found):
+                    self.state_machine.debug.publish(self.past_hint)
+                else:
+                    if self.past_hint is not None:
+                        # print(area)
+                        # print(self.past_area)
+                        # print("-----")
+                        if area > self.past_area:
+                            self.past_hint = hint
+                            self.past_area = area
+                        else:
+                            # print(self.past_area)
+                            self.hint_found = True
+                    else:
+                        self.past_hint = hint
+                        self.past_area = area
+                    # cv2.namedWindow("hint_frame", cv2.WINDOW_AUTOSIZE)
+                    # cv2.imshow("hint_frame", hint)
+                    # cv2.waitKey(1)
+            else:
+                self.hint_found = False
+                self.past_hint = None
+                self.past_area = 0
+                self.state_machine.debug.publish(img)
+                # cv2.destroyAllWindows()
+            # Move the robot for 2 seconds
+            # self.move_pub.move_publisher(0.0)
+            
                 self.state_machine.debug.publish(hint)
 
                 characters = imgt.character_split(hint)
@@ -57,13 +88,7 @@ class RoadDrivingState:
                 # word =  ''.join(decoded_chars)
 
                 # print(decoded_chars)
-
-            # Move the robot for 2 seconds
-            # self.state_machine.move_pub.move_publisher(0.1)
-            # self.transition_to_substate("clue_board")
             
-            # Stop the robot movement
-            # self.state_machine.move_pub.stop_publisher()
 
         elif self.current_substate == "pedestrian_crossing":
             # Call the execute method of sub-state 2
