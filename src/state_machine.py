@@ -3,6 +3,8 @@
 import rospy
 import sys
 
+# from tensorflow import keras as ks
+
 from utils.move_publisher import MovePublisher 
 from utils.score_publisher import ScorePublisher
 from utils.image_subscriber import ImageSubscriber
@@ -28,6 +30,8 @@ class StateMachine():
         self.current_state = "start"
 
         self.next_state = first_state #TODO: make sure this thing works 
+
+        # self.clue_board = ks.models.load_model("/home/fizzer/ros_ws/src/controller_pkg/nn_models/signNN_3.h5")
 
         self.move_pub = MovePublisher()
         self.score_pub = ScorePublisher()

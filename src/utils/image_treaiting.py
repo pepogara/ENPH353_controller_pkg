@@ -183,3 +183,90 @@ def brighten(img, value=255):
     final_hsv = cv.merge((h, s, v))
     img = cv.cvtColor(final_hsv, cv.COLOR_HSV2BGR)
     return img 
+
+def character_split(img, clue=True):
+    """!
+    @brief      Function to split image into characters
+
+    @param      img - image to be split
+    @param      clue - boolean to indicate if image is a clue or not
+                True for clues, False for type (top of image)
+    
+    @return     characters - list of images with each character
+    """
+
+    img = cv.resize(img, (400, 600))
+
+    img = np.expand_dims(img, axis=0)  # Expand dimension to match neural network input shape
+
+    y_range = (250, 340) if clue else (30, 120)
+    start_x = 30 if clue else 250
+    end_x = 75 if clue else 295
+    increment = 45
+
+    num_chars = 11 if clue else 5
+
+    characters = []
+
+    for i in range(num_chars):
+        char = img[:, y_range[0]:y_range[1], start_x:end_x]  # Adjust slicing to match expanded dimension
+        characters.append(char)
+        start_x += increment
+        end_x += increment
+
+
+    return characters
+
+def onehotToStr(one_hot_vector):
+    """!
+    @brief Convert a one-hot encoded vector to a string.
+
+    This function takes a one-hot encoded vector and converts it into a string
+    representation based on the characters defined in the "characters" string.
+
+    @param one_hot_vector: One-hot encoded vector to convert to a string.
+
+    @return: A string representation of the one-hot encoded vector.
+    """
+    characters = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ "
+    decoded_strings = []
+
+    index = np.argmax(one_hot_vector)
+    character = characters[index]
+    decoded_strings.append(character)
+
+    # Join the characters to form the final string
+    return ''.join(decoded_strings)
+
+def onehotToIndex(one_hot_vector):
+    """!
+    @brief Convert a one-hot encoded vector to its index.
+
+    This function takes a one-hot encoded vector and returns the index of
+    the maximum value in the vector, indicating which character is encoded.
+
+    @param one_hot_vector: One-hot encoded vector to convert to an index.
+
+    @return: The index of the maximum value in the one-hot vector.
+    """
+    return np.argmax(one_hot_vector)
+
+def predict_word(nn, img, clue=True):
+    """!
+    @brief      Function to predict the word from an image
+
+    @param      nn - neural network to use for prediction
+    @param      img - image to be predicted
+
+    @return     word - predicted word
+    """
+    
+    characters = character_split(img, clue)
+    decoded_chars = []
+
+    for char in characters:
+        prediction = nn.predict(char)
+        single_dig = onehotToStr(prediction)
+        decoded_chars.append(single_dig)
+
+    return ''.join(decoded_chars)

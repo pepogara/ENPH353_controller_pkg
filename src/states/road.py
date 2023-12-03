@@ -5,7 +5,10 @@ import rospy
 import sys
 import cv2
 
+from tensorflow import keras as ks
+
 import utils.image_treaiting as imgt
+
 
 class RoadDrivingState:
     """!
@@ -18,15 +21,7 @@ class RoadDrivingState:
         """
         self.state_machine = state_machine
         self.current_substate = "follow_road"
-
-    # def execute(self, controller):
-    #     """!
-    #     @brief      Executes the given controller.
-
-    #     @param      controller  The controller
-    #     """
-    #     controller.road_driving()
-
+        self.model = ks.models.load_model("/home/fizzer/ros_ws/src/controller_pkg/nn_models/signNN_3.h5")
 
     def transition_to_substate(self, substate):
         """!
@@ -40,25 +35,35 @@ class RoadDrivingState:
         @brief      Executes the given controller.
         """
         if self.current_substate == "follow_road":
-            start_time = rospy.get_time()
-            while rospy.get_time() - start_time < 8 and not rospy.is_shutdown():
-                img = self.state_machine.camera.get_frame()
+            img = self.state_machine.camera.get_frame()
 
-                self.state_machine.debug.publish(img)
+            # self.state_machine.debug.publish(img)
 
-                hsv = imgt.HSV(img)
-                hint = imgt.homography(hsv, img)
-                if hint is not None:
-                    cv2.namedWindow("hint_frame", cv2.WINDOW_AUTOSIZE)
-                    cv2.imshow("hint_frame", hint)
-                    cv2.waitKey(1)
-                else:
-                    cv2.destroyAllWindows()
-                # Move the robot for 2 seconds
-                # self.move_pub.move_publisher(0.0)
+            hsv = imgt.HSV(img)
+            hint = imgt.homography(hsv, img)
+
+            if hint is not None:
+                self.state_machine.debug.publish(hint)
+
+                characters = imgt.character_split(hint)
+                decoded_chars = []
+
+                for char in characters:
+                    # prediction = self.model.predict(char)
+                    # single_dig = imgt.onehotToStr(prediction)
+                    # decoded_chars.append(single_dig)
+                    pass
+
+                # word =  ''.join(decoded_chars)
+
+                # print(decoded_chars)
+
+            # Move the robot for 2 seconds
+            # self.state_machine.move_pub.move_publisher(0.1)
+            # self.transition_to_substate("clue_board")
             
             # Stop the robot movement
-            self.state_machine.move_pub.stop_publisher()
+            # self.state_machine.move_pub.stop_publisher()
 
         elif self.current_substate == "pedestrian_crossing":
             # Call the execute method of sub-state 2
@@ -70,5 +75,8 @@ class RoadDrivingState:
 
         elif self.current_substate == "clue_board":
             # Call the execute method of sub-state 4
-            pass
+            
+            self.state_machine.clue_board.predict(hint)
+
+            self.transition_to_substate("follow_road")
             
