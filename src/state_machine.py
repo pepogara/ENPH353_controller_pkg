@@ -62,7 +62,7 @@ class StateMachine():
 
             elif self.current_state == "road":
 
-                road.execute()
+                self.road.execute()
 
             elif self.current_state == "respawn":
                 pass
