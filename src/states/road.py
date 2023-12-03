@@ -50,45 +50,34 @@ class RoadDrivingState:
                     self.state_machine.debug.publish(self.past_hint)
                 else:
                     if self.past_hint is not None:
-                        # print(area)
-                        # print(self.past_area)
-                        # print("-----")
+
                         if area > self.past_area:
                             self.past_hint = hint
                             self.past_area = area
                         else:
-                            # print(self.past_area)
                             self.hint_found = True
+
+                            characters = imgt.character_split(hint)
+                            decoded_chars = []
+
+                            for char in characters:
+                                prediction = self.model.predict(char)
+                                single_dig = imgt.onehotToStr(prediction)
+                                decoded_chars.append(single_dig)
+
+                            # word =  ''.join(decoded_chars)
+
+                            print(decoded_chars)
+
                     else:
                         self.past_hint = hint
                         self.past_area = area
-                    # cv2.namedWindow("hint_frame", cv2.WINDOW_AUTOSIZE)
-                    # cv2.imshow("hint_frame", hint)
-                    # cv2.waitKey(1)
+
             else:
                 self.hint_found = False
                 self.past_hint = None
                 self.past_area = 0
-                self.state_machine.debug.publish(img)
-                # cv2.destroyAllWindows()
-            # Move the robot for 2 seconds
-            # self.move_pub.move_publisher(0.0)
-            
-                self.state_machine.debug.publish(hint)
-
-                characters = imgt.character_split(hint)
-                decoded_chars = []
-
-                for char in characters:
-                    # prediction = self.model.predict(char)
-                    # single_dig = imgt.onehotToStr(prediction)
-                    # decoded_chars.append(single_dig)
-                    pass
-
-                # word =  ''.join(decoded_chars)
-
-                # print(decoded_chars)
-            
+                self.state_machine.debug.publish(img)            
 
         elif self.current_substate == "pedestrian_crossing":
             # Call the execute method of sub-state 2
