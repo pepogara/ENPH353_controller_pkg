@@ -5,7 +5,10 @@ import rospy
 import sys
 import cv2
 
+from tensorflow import keras as ks
+
 import utils.image_treaiting as imgt
+
 
 class RoadDrivingState:
     """!
@@ -22,13 +25,7 @@ class RoadDrivingState:
         self.past_area = 0
         self.hint_found = False
 
-    # def execute(self, controller):
-    #     """!
-    #     @brief      Executes the given controller.
-
-    #     @param      controller  The controller
-    #     """
-    #     controller.road_driving()
+        self.model = ks.models.load_model("/home/fizzer/ros_ws/src/controller_pkg/nn_models/signNN_3.h5")
 
 
     def transition_to_substate(self, substate):
@@ -43,7 +40,7 @@ class RoadDrivingState:
         @brief      Executes the given controller.
         """
         if self.current_substate == "follow_road":
-            
+
             img = self.state_machine.camera.get_frame()
 
             hsv = imgt.HSV(img)
@@ -76,6 +73,22 @@ class RoadDrivingState:
                 # cv2.destroyAllWindows()
             # Move the robot for 2 seconds
             # self.move_pub.move_publisher(0.0)
+            
+                self.state_machine.debug.publish(hint)
+
+                characters = imgt.character_split(hint)
+                decoded_chars = []
+
+                for char in characters:
+                    # prediction = self.model.predict(char)
+                    # single_dig = imgt.onehotToStr(prediction)
+                    # decoded_chars.append(single_dig)
+                    pass
+
+                # word =  ''.join(decoded_chars)
+
+                # print(decoded_chars)
+            
 
         elif self.current_substate == "pedestrian_crossing":
             # Call the execute method of sub-state 2
@@ -87,5 +100,8 @@ class RoadDrivingState:
 
         elif self.current_substate == "clue_board":
             # Call the execute method of sub-state 4
-            pass
+            
+            self.state_machine.clue_board.predict(hint)
+
+            self.transition_to_substate("follow_road")
             
