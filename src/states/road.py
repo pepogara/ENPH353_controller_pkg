@@ -40,25 +40,39 @@ class RoadDrivingState:
         @brief      Executes the given controller.
         """
         if self.current_substate == "follow_road":
-            start_time = rospy.get_time()
-            while rospy.get_time() - start_time < 8 and not rospy.is_shutdown():
-                img = self.state_machine.camera.get_frame()
-
-                self.state_machine.debug.publish(img)
-
-                hsv = imgt.HSV(img)
-                hint = imgt.homography(hsv, img)
-                if hint is not None:
-                    cv2.namedWindow("hint_frame", cv2.WINDOW_AUTOSIZE)
-                    cv2.imshow("hint_frame", hint)
-                    cv2.waitKey(1)
-                else:
-                    cv2.destroyAllWindows()
-                # Move the robot for 2 seconds
-                # self.move_pub.move_publisher(0.0)
             
-            # Stop the robot movement
-            self.state_machine.move_pub.stop_publisher()
+            img = self.state_machine.camera.get_frame()
+
+            hsv = imgt.HSV(img)
+            hint, area = imgt.homography(hsv, img)
+            if hint is not None:
+                if (self.hint_found):
+                    self.state_machine.debug.publish(self.past_hint)
+                else:
+                    if self.past_hint is not None:
+                        # print(area)
+                        # print(self.past_area)
+                        # print("-----")
+                        if area > self.past_area:
+                            self.past_hint = hint
+                            self.past_area = area
+                        else:
+                            # print(self.past_area)
+                            self.hint_found = True
+                    else:
+                        self.past_hint = hint
+                        self.past_area = area
+                    # cv2.namedWindow("hint_frame", cv2.WINDOW_AUTOSIZE)
+                    # cv2.imshow("hint_frame", hint)
+                    # cv2.waitKey(1)
+            else:
+                self.hint_found = False
+                self.past_hint = None
+                self.past_area = 0
+                self.state_machine.debug.publish(img)
+                # cv2.destroyAllWindows()
+            # Move the robot for 2 seconds
+            # self.move_pub.move_publisher(0.0)
 
         elif self.current_substate == "pedestrian_crossing":
             # Call the execute method of sub-state 2
