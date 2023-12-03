@@ -114,11 +114,12 @@ def homography(hsv, img):
         # Find the largest inner contour (the white rectangular frame, others are noise) if it exists
         largest_contour = max(inner_contours, key=cv.contourArea)
     except:
-        return None
+        return None, 0
     
     # ignores contours that are too small
-    if cv.contourArea(largest_contour) < 8000:
-        return None
+    contourArea = cv.contourArea(largest_contour)
+    if contourArea < 11000:
+        return None, 0
 
     # Approximate the largest contour with a polygon
     epsilon = 0.1 * cv.arcLength(largest_contour, True)
@@ -131,7 +132,7 @@ def homography(hsv, img):
     startTime = rospy.get_time()
     while len(corner_points) != 4:
         if rospy.get_time() - startTime > 0.1:
-            return None
+            return None, 0
         epsilon = (0.1 + .01*(len(corner_points)- 4)) * cv.arcLength(largest_contour, True)
         approx_polygon = cv.approxPolyDP(largest_contour, epsilon, True)
         # Extract the corner points from the approximated polygon
@@ -155,7 +156,7 @@ def homography(hsv, img):
     # Apply the same perspective transform to the img
     transformed_img = cv.warpPerspective(img, matrix, (img.shape[1], img.shape[0]))
 
-    return brighten(transformed_img, 200)
+    return brighten(transformed_img), contourArea
     # return cv.drawContours(img, [largest_contour], -1, (0, 255, 0), 1)
     # for point in corner_points:
     #     cv.circle(img, point, 5, (0, 0, 255), -1)
