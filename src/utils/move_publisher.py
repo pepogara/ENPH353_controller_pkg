@@ -2,7 +2,7 @@
 
 import rospy
 from geometry_msgs.msg import Twist
-
+from gazebo_msgs.msg import ModelState
 
 class MovePublisher:
     """!
@@ -45,3 +45,29 @@ class MovePublisher:
 
         self.move_pub.publish(stop)
         self.rate.sleep()
+
+    def spawn_position(self, position):
+        """!
+        @brief      Spawns the robot at the given position.
+
+        @param      position (list): The position to spawn the robot at.
+        """
+
+        msg = ModelState()
+        msg.model_name = 'R1'
+
+        msg.pose.position.x = position[0]
+        msg.pose.position.y = position[1]
+        msg.pose.position.z = position[2]
+        msg.pose.orientation.x = position[3]
+        msg.pose.orientation.y = position[4]
+        msg.pose.orientation.z = position[5]
+        msg.pose.orientation.w = position[6]
+
+        rospy.wait_for_service('/gazebo/set_model_state')
+        try:
+            set_state = rospy.ServiceProxy('/gazebo/set_model_state', SetModelState)
+            resp = set_state( msg )
+
+        except rospy.ServiceException:
+            print ("Service call failed")

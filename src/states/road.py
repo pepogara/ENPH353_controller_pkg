@@ -56,7 +56,7 @@ class RoadDrivingState:
                         else:
                             self.hint_found = True
 
-                            clue = self.clue_detect(self.past_hint)
+                            clue = self.clue_detect(self.past_hint).rstrip()
 
                             self.state_machine.score_pub.clue_publisher(clue, 1)
 

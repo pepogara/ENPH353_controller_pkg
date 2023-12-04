@@ -31,14 +31,14 @@ class StateMachine():
 
         self.next_state = first_state #TODO: make sure this thing works 
 
-        # self.clue_board = ks.models.load_model("/home/fizzer/ros_ws/src/controller_pkg/nn_models/signNN_3.h5")
-
         self.move_pub = MovePublisher()
         self.score_pub = ScorePublisher()
         self.camera = ImageSubscriber()
         self.debug = ImagePublisher()
         self.road = RoadDrivingState(self)
-        rospy.Timer(rospy.Duration(1), self.execute, oneshot=True)
+        rospy.Timer(rospy.Duration(2), self.execute, oneshot=True)
+        rospy.Timer(rospy.Duration(241), rospy.signal_shutdown, oneshot=True)
+
         rospy.on_shutdown(self.on_shutdown)
     
     def transition_to(self, new_state):
