@@ -6,7 +6,7 @@ import rospy
 import time
 
 
-def HSV(img, uh, us, uv, lh, ls, lv):
+def HSV(img, key):
     """!
     @brief      Function to apply mask to image to isolate hints
 
@@ -25,6 +25,21 @@ def HSV(img, uh, us, uv, lh, ls, lv):
 
     # Convert BGR to HSV
     hsv = cv.cvtColor(img, cv.COLOR_BGR2HSV)
+
+    if key == "road":
+        uh = 255
+        us = 255
+        uv = 255
+        lh = 0
+        ls = 0
+        lv = 250
+    if key == "clue":
+        uh = 130
+        us = 255
+        uv = 204
+        lh = 118
+        ls = 50
+        lv = 75
 
     lower_hsv = np.array([lh,ls,lv])
     upper_hsv = np.array([uh,us,uv])
@@ -93,33 +108,33 @@ def HSV(img, uh, us, uv, lh, ls, lv):
     # cv.destroyAllWindows()
     
 def homography(hsv, img):
-    """!
-    @brief      Function to apply perspective transform to image to isolate hint
+    """"
+    Function to apply perspective transform to image
+    to isolate hint
 
-    @param      hsv - masked image used to get the transform 
-    @param      img - original image that transform will be applied to
+    Parameters: hsv - masked image used to get the transform 
+                img - original image that transform will be applied to
 
-    @return     transformed_img - full color image with perspective transform applied
-                None - if no hint is found, or if the hint is too small
+    Returns: transformed_img - full color image with perspective transform applied
+             None - if no hint is found, or if the hint is too small
     """
 
+    """First get the transform for the outer contour"""
     # Find contours in the HSV image
-    # RETR_CCOMP retrieves all contours and organizes them into a two level heirarchy
+    # RETR_EXTERNAL retrieves all contours and organizes them into a two level heirarchy
     # CHAIN_APPROX_SIMPLE stores only the corner points of the contour
-    contours, hierarchy = cv.findContours(hsv, cv.RETR_CCOMP, cv.CHAIN_APPROX_SIMPLE)
+    contours, _ = cv.findContours(hsv, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
 
-    # Finds all inner contours (holes)
-    inner_contours = [contours[i] for i in range(len(contours)) if hierarchy[0][i][3] >= 0]
-    
+    # Find largest external contour
     try:
-        # Find the largest inner contour (the white rectangular frame, others are noise) if it exists
-        largest_contour = max(inner_contours, key=cv.contourArea)
+        largest_contour = max(contours, key=cv.contourArea)
     except:
         return None, 0
     
     # ignores contours that are too small
     contourArea = cv.contourArea(largest_contour)
-    if contourArea < 11000:
+    if contourArea < 20000:
+        # print("Hint too small")
         return None, 0
 
     # Approximate the largest contour with a polygon
@@ -136,9 +151,9 @@ def homography(hsv, img):
             return None, 0
         epsilon = (0.1 + .01*(len(corner_points)- 4)) * cv.arcLength(largest_contour, True)
         approx_polygon = cv.approxPolyDP(largest_contour, epsilon, True)
+
         # Extract the corner points from the approximated polygon
         corner_points = [point[0] for point in approx_polygon]
-    
 
     # Sort the corner points in the order top left, bottom left, bottom right, top right (sorted sorts ascending)
     sorted_corner_points = sorted(corner_points, key=lambda point: point[0])
@@ -153,15 +168,69 @@ def homography(hsv, img):
     # Compute the perspective transform matrix
     matrix = cv.getPerspectiveTransform(src_pts, dst_pts)
 
+    # Apply the same perspective transform to the img
+    transform1 = cv.warpPerspective(img, matrix, (img.shape[1], img.shape[0]))
+    
+    """------------------------------------------------------------------------------"""
+    """Now get the transform for the inner contour"""
+
+    hsv2 = HSV(transform1, "clue")
+
+    # Find contours in the HSV image
+    # RETR_EXTERNAL retrieves all contours and organizes them into a two level heirarchy
+    # CHAIN_APPROX_SIMPLE stores only the corner points of the contour
+    contours, hierarchy = cv.findContours(hsv2, cv.RETR_CCOMP, cv.CHAIN_APPROX_SIMPLE)
+    
+    # Finds all inner contours (holes)
+    inner_contours = [contours[i] for i in range(len(contours)) if hierarchy[0][i][3] >= 0]
+
+    try:
+        # Find the largest inner contour (the white rectangular frame, others are noise) if it exists
+        largest_contour = max(inner_contours, key=cv.contourArea)
+    except:
+        # print("No hint found")
+        return None, 0
+
+    # Approximate the largest contour with a polygon
+    epsilon = 0.1 * cv.arcLength(largest_contour, True)
+    approx_polygon = cv.approxPolyDP(largest_contour, epsilon, True)
+
+    # Extract the corner points from the approximated polygon
+    corner_points = [point[0] for point in approx_polygon]
+
+    """Untested code for if corner_points is not 4"""
+    startTime = rospy.get_time()
+    while len(corner_points) != 4:
+        if rospy.get_time() - startTime > 0.1:
+            return None, 0
+        epsilon = (0.1 + .01*(len(corner_points)- 4)) * cv.arcLength(largest_contour, True)
+        approx_polygon = cv.approxPolyDP(largest_contour, epsilon, True)
+
+        # Extract the corner points from the approximated polygon
+        corner_points = [point[0] for point in approx_polygon]
+    
+    # Sort the corner points in the order top left, bottom left, bottom right, top right (sorted sorts ascending)
+    sorted_corner_points = sorted(corner_points, key=lambda point: point[0])
+    left = sorted(sorted_corner_points[:2], key=lambda point: point[1])
+    right = sorted(sorted_corner_points[2:], key=lambda point: point[1], reverse=True)
+    sorted_corner_points = left + right
+    # print(sorted_corner_points)
+
+    # Create the source and destination points for perspective transform
+    src_pts = np.float32([[point[0], point[1]] for point in sorted_corner_points])
+    dst_pts = np.float32([[0, 0], [0, hsv2.shape[0]], [hsv2.shape[1], hsv2.shape[0]], [hsv2.shape[1], 0]])
+    # Compute the perspective transform matrix
+    matrix = cv.getPerspectiveTransform(src_pts, dst_pts)
+
 
     # Apply the same perspective transform to the img
-    transformed_img = cv.warpPerspective(img, matrix, (img.shape[1], img.shape[0]))
+    transformed_img = cv.warpPerspective(transform1, matrix, (transform1.shape[1], transform1.shape[0]))
 
     return brighten(transformed_img), contourArea
     # return cv.drawContours(img, [largest_contour], -1, (0, 255, 0), 1)
     # for point in corner_points:
-    #     cv.circle(img, point, 5, (0, 0, 255), -1)
-    # return img
+    #     cv.circle(transform1, point, 3, (0, 0, 255), -1)
+    # return transform1
 
 def brighten(img, value=255):
     """!

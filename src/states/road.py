@@ -51,10 +51,10 @@ class RoadDrivingState:
 
         if self.current_substate == "follow_road":
 
-            lines = imgt.HSV(img, 255, 255, 255, 0, 0, 250)
+            lines = imgt.HSV(img, "road")
 
             # For debugging
-            self.state_machine.debug.publish(lines)
+            self.state_machine.debug.publish(lines, "mono8")
             
             '''
             val = 0  # Current pixel value
@@ -91,7 +91,7 @@ class RoadDrivingState:
             '''
             # self.state_machine.move_pub.move_publisher(output)
 
-            self.transition_to_substate("clue_board")
+            # self.transition_to_substate("clue_board")
             
 
         elif self.current_substate == "pedestrian_crossing":
@@ -105,12 +105,15 @@ class RoadDrivingState:
         elif self.current_substate == "clue_board":
             # Call the execute method of sub-state 4
 
-            hsv = imgt.HSV(img, 130, 255, 204, 118, 50, 75)
+            hsv = imgt.HSV(img, "clue")
             hint, area = imgt.homography(hsv, img)
             if hint is not None:
                 if (self.hint_found):
-                    # self.state_machine.debug.publish(self.past_hint)
-                    pass
+                    # cv2.namedWindow("hint")
+                    # cv2.imshow("hint", self.past_hint)
+                    # cv2.waitKey(1)
+                    self.state_machine.debug.publish(self.past_hint, "bgr8")
+                    # pass
                 else:
                     if self.past_hint is not None:
                         if area > self.past_area:
@@ -119,9 +122,9 @@ class RoadDrivingState:
                         else:
                             self.hint_found = True
 
-                            clue = self.clue_detect(self.past_hint).rstrip()
+                            # clue = self.clue_detect(self.past_hint).rstrip()
 
-                            self.state_machine.score_pub.clue_publisher(clue, 1)
+                            # self.state_machine.score_pub.clue_publisher(clue, 1)
 
                     else:
                         self.past_hint = hint
@@ -131,9 +134,9 @@ class RoadDrivingState:
                 self.hint_found = False
                 self.past_hint = None
                 self.past_area = 0
-                # self.state_machine.debug.publish(img)
+                self.state_machine.debug.publish(img, "bgr8")
 
-            self.transition_to_substate("follow_road")
+            # self.transition_to_substate("follow_road")
 
     def clue_detect(self, hint):
         """!

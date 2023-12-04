@@ -18,7 +18,7 @@ class ImagePublisher:
         self.image_pub = rospy.Publisher("image_topic_2", Image, queue_size=10)
         self.bridge = CvBridge()
 
-    def publish(self, image):
+    def publish(self, image, type):
         """!
         @brief      Publishes the image to the image_topic_2 topic.
 
@@ -26,6 +26,6 @@ class ImagePublisher:
 
         """
         try:
-            self.image_pub.publish(self.bridge.cv2_to_imgmsg(image, "mono8"))
+            self.image_pub.publish(self.bridge.cv2_to_imgmsg(image, type))
         except CvBridgeError as e:
             print(e)
