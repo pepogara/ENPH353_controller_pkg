@@ -196,9 +196,7 @@ def character_split(img, clue=True):
     @return     characters - list of images with each character
     """
 
-    img = cv.resize(img, (400, 600))
-
-    img = np.expand_dims(img, axis=0)  # Expand dimension to match neural network input shape
+    img = cv.resize(img, (600, 400))
 
     y_range = (250, 340) if clue else (30, 120)
     start_x = 30 if clue else 250
@@ -210,7 +208,10 @@ def character_split(img, clue=True):
     characters = []
 
     for i in range(num_chars):
-        char = img[:, y_range[0]:y_range[1], start_x:end_x]  # Adjust slicing to match expanded dimension
+        char = img[y_range[0]:y_range[1], start_x:end_x]  # Adjust slicing to match expanded dimension
+
+        char = np.expand_dims(char, axis=0)  # Expand dimension to match neural network input shape
+
         characters.append(char)
         start_x += increment
         end_x += increment

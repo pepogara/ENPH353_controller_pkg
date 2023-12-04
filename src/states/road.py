@@ -56,17 +56,9 @@ class RoadDrivingState:
                         else:
                             self.hint_found = True
 
-                            characters = imgt.character_split(hint)
-                            decoded_chars = []
+                            clue = self.clue_detect(self.past_hint)
 
-                            for char in characters:
-                                prediction = self.model.predict(char)
-                                single_dig = imgt.onehotToStr(prediction)
-                                decoded_chars.append(single_dig)
-
-                            # word =  ''.join(decoded_chars)
-
-                            print(decoded_chars)
+                            self.state_machine.score_pub.clue_publisher(clue, 1)
 
                     else:
                         self.past_hint = hint
@@ -95,4 +87,24 @@ class RoadDrivingState:
             self.state_machine.clue_board.predict(hint)
 
             self.transition_to_substate("follow_road")
-            
+
+    def clue_detect(self, hint):
+        """!
+        @brief      Detects the clue in the clue board.
+
+        @param      hint  The hint image
+
+        @return     The decoded clue.
+        """
+
+        characters = imgt.character_split(hint)
+        decoded_chars = []
+
+        for char in characters:
+            prediction = self.model.predict(char)
+            single_dig = imgt.onehotToStr(prediction)
+            decoded_chars.append(single_dig)
+
+        return ''.join(decoded_chars)
+
+        
