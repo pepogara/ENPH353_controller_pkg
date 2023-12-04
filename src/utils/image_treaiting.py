@@ -3,13 +3,20 @@
 import numpy as np
 import cv2 as cv
 import rospy
+import time
 
 
-def HSV(img):
+def HSV(img, uh, us, uv, lh, ls, lv):
     """!
     @brief      Function to apply mask to image to isolate hints
 
     @param      img - image to be masked
+    @param      uh - upper hue value
+    @param      us - upper saturation value
+    @param      uv - upper value value
+    @param      lh - lower hue value
+    @param      ls - lower saturation value
+    @param      lv - lower value value
 
     @return     mask - masked image
     """
@@ -19,12 +26,6 @@ def HSV(img):
     # Convert BGR to HSV
     hsv = cv.cvtColor(img, cv.COLOR_BGR2HSV)
 
-    uh = 130
-    us = 255
-    uv = 103 # originally 255
-    lh = 118 # originally 110
-    ls = 50 # originally 50 then 195
-    lv = 75 # originally 50
     lower_hsv = np.array([lh,ls,lv])
     upper_hsv = np.array([uh,us,uv])
 

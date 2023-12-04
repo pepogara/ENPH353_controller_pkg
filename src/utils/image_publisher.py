@@ -26,6 +26,6 @@ class ImagePublisher:
 
         """
         try:
-            self.image_pub.publish(self.bridge.cv2_to_imgmsg(image, "bgr8"))
+            self.image_pub.publish(self.bridge.cv2_to_imgmsg(image, "mono8"))
         except CvBridgeError as e:
             print(e)
