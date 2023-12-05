@@ -33,9 +33,9 @@ class OffRoadDrivingState:
         self.integral = 0
         self.previous_error = 0
 
-        self.Kp = 0.02
+        self.Kp = 0.025
         self.Ki = 0.00
-        self.Kd = 0.015
+        self.Kd = 0.02
 
 
     def transition_to_substate(self, substate):
@@ -158,7 +158,7 @@ class OffRoadDrivingState:
 
         word = ''.join(decoded_chars).rstrip()
 
-        similar = self.state_machine.score_pub.most_similar_string(word)
+        similar = self.state_machine.score_pub.most_similar_string(word, "off_road")
 
         index = self.state_machine.score_pub.all_clue_types.index(similar) + 1
 
