@@ -71,7 +71,7 @@ class OffRoadDrivingState:
 
             self.previous_error = error
 
-            self.state_machine.move_pub.move_publisher(output)
+            self.state_machine.move_pub.move_publisher(output, 0.3)
 
             self.transition_to_substate("clue_board")
 
@@ -101,9 +101,7 @@ class OffRoadDrivingState:
                                 self.read_clues.append(clue_type)
                                 self.state_machine.score_pub.clue_publisher(clue, clue_type)
 
-                                #TODO:
-                                ###THIS IF IS NOT WORKING... NOT GETTING INSIDE THE STATEMENT 
-                                if clue_type == "MOTIVE": # to check if the last clue on the road is read
+                                if clue_type == 6: # to check if the last clue on the road is read
                                     self.last_clue = True
                                     self.state_machine.move_pub.stop_publisher()
 

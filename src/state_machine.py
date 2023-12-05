@@ -62,11 +62,13 @@ class StateMachine():
         """
         while not rospy.is_shutdown():
             if self.current_state == "start":
+                
                 self.score_pub.start()
 
                 self.transition_to(self.next_state)
 
             elif self.current_state == "idle":
+
                 self.move_pub.stop_publisher()
 
             elif self.current_state == "road":
@@ -75,10 +77,8 @@ class StateMachine():
                 
                 if self.road.done():
                     self.transition_to("off_road")
-                    print("transitioning to off_road")
 
             elif self.current_state == "off_road":
-                print("here")
 
                 self.off_road.execute()
 

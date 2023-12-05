@@ -90,7 +90,7 @@ class MovePublisher:
                     None if the road is not detected.
         """
         height, width = masked_img.shape
-        y_values = [int(height * 2 / 3 + 20), int(height * 1 / 2), int(height * 3 / 4)]  # Three different y values
+        y_values = [int(height * 2 / 3 + 20), int(height * 2 / 3), int(height * 1 / 2 + 10), int(height * 3 / 4)]  # Three different y values
         left_x = None
         right_x = None
         center_x_sum = 0

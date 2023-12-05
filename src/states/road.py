@@ -104,9 +104,8 @@ class RoadDrivingState:
                                 self.read_clues.append(clue_type)
                                 self.state_machine.score_pub.clue_publisher(clue, clue_type)
 
-                                #TODO:
-                                ###THIS IF IS NOT WORKING... NOT GETTING INSIDE THE STATEMENT 
-                                if clue_type == 'TIME': # to check if the last clue on the road is read
+                                
+                                if clue_type == 4: # to check if the last clue on the road is read
                                     print("got the last clue")
                                     self.last_clue = True
                                     self.state_machine.move_pub.stop_publisher()
