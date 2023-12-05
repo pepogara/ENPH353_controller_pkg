@@ -20,7 +20,7 @@ class RoadDrivingState:
         @brief      Constructs a new instance.
         """
         self.state_machine = state_machine
-        self.current_substate = "follow_road"
+        self.current_substate = "clue_board"
         self.past_hint = None
         self.past_area = 0
         self.hint_found = False
