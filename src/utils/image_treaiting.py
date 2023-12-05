@@ -6,17 +6,15 @@ import rospy
 import time
 
 
-def HSV(img, key):
+def HSV(img, key, val = True):
     """!
     @brief      Function to apply mask to image to isolate hints
 
     @param      img - image to be masked
-    @param      uh - upper hue value
-    @param      us - upper saturation value
-    @param      uv - upper value value
-    @param      lh - lower hue value
-    @param      ls - lower saturation value
-    @param      lv - lower value value
+    @param      key - string to indicate which mask to use
+                "road" - mask for road
+                "clue" - mask for clue
+    @param      val - boolean to indicate if HSV values should be returned or not
 
     @return     mask - masked image
     """
@@ -40,72 +38,79 @@ def HSV(img, key):
         lh = 118
         ls = 50
         lv = 75
+    if key == "off_road":
+        uh = 105
+        us = 83
+        uv = 237
+        lh = 0
+        ls = 0
+        lv = 179
 
     lower_hsv = np.array([lh,ls,lv])
     upper_hsv = np.array([uh,us,uv])
 
     # Threshold the HSV image to get only blue colors
     mask = cv.inRange(hsv, lower_hsv, upper_hsv)
-    return mask
+    if val: return mask
 
     """Code for calibrating HSV values"""
-    # window_name = "HSV Calibrator"
-    # cv.namedWindow(window_name)
+    window_name = "HSV Calibrator"
+    cv.namedWindow(window_name)
 
-    # def nothing(x):
-    #     print("Trackbar value: " + str(x))
-    #     pass
+    def nothing(x):
+        print("Trackbar value: " + str(x))
+        pass
 
-    # # create trackbars for Upper HSV
-    # cv.createTrackbar('UpperH',window_name,0,255,nothing)
-    # cv.setTrackbarPos('UpperH',window_name, uh)
+    # create trackbars for Upper HSV
+    cv.createTrackbar('UpperH',window_name,0,255,nothing)
+    cv.setTrackbarPos('UpperH',window_name, uh)
 
-    # cv.createTrackbar('UpperS',window_name,0,255,nothing)
-    # cv.setTrackbarPos('UpperS',window_name, us)
+    cv.createTrackbar('UpperS',window_name,0,255,nothing)
+    cv.setTrackbarPos('UpperS',window_name, us)
 
-    # cv.createTrackbar('UpperV',window_name,0,255,nothing)
-    # cv.setTrackbarPos('UpperV',window_name, uv)
+    cv.createTrackbar('UpperV',window_name,0,255,nothing)
+    cv.setTrackbarPos('UpperV',window_name, uv)
 
-    # # create trackbars for Lower HSV
-    # cv.createTrackbar('LowerH',window_name,0,255,nothing)
-    # cv.setTrackbarPos('LowerH',window_name, lh)
+    # create trackbars for Lower HSV
+    cv.createTrackbar('LowerH',window_name,0,255,nothing)
+    cv.setTrackbarPos('LowerH',window_name, lh)
 
-    # cv.createTrackbar('LowerS',window_name,0,255,nothing)
-    # cv.setTrackbarPos('LowerS',window_name, ls)
+    cv.createTrackbar('LowerS',window_name,0,255,nothing)
+    cv.setTrackbarPos('LowerS',window_name, ls)
 
-    # cv.createTrackbar('LowerV',window_name,0,255,nothing)
-    # cv.setTrackbarPos('LowerV',window_name, lv)
+    cv.createTrackbar('LowerV',window_name,0,255,nothing)
+    cv.setTrackbarPos('LowerV',window_name, lv)
 
-    # font = cv.FONT_HERSHEY_SIMPLEX
+    font = cv.FONT_HERSHEY_SIMPLEX
 
-    # print("Loaded images")
+    print("Loaded images")
 
-    # while(1):
-    #     # Threshold the HSV image to get only blue colors
-    #     mask = cv.inRange(hsv, lower_hsv, upper_hsv)
-    #     cv.putText(mask,'Lower HSV: [' + str(lh) +',' + str(ls) + ',' + str(lv) + ']', (10,30), font, 0.5, (200,255,155), 1, cv.LINE_AA)
-    #     cv.putText(mask,'Upper HSV: [' + str(uh) +',' + str(us) + ',' + str(uv) + ']', (10,60), font, 0.5, (200,255,155), 1, cv.LINE_AA)
-    #     cv.imshow(window_name,mask)
+    while(1):
+        # Threshold the HSV image to get only blue colors
+        mask = cv.inRange(hsv, lower_hsv, upper_hsv)
+        cv.putText(mask,'Lower HSV: [' + str(lh) +',' + str(ls) + ',' + str(lv) + ']', (10,30), font, 0.5, (200,255,155), 1, cv.LINE_AA)
+        cv.putText(mask,'Upper HSV: [' + str(uh) +',' + str(us) + ',' + str(uv) + ']', (10,60), font, 0.5, (200,255,155), 1, cv.LINE_AA)
+        cv.imshow(window_name,mask)
 
-    #     k = cv.waitKey(1) & 0xFF
-    #     if k == 27:
-    #         pass
-    #         break
-    #     # get current positions of Upper HSV trackbars
-    #     uh = cv.getTrackbarPos('UpperH',window_name)
-    #     us = cv.getTrackbarPos('UpperS',window_name)
-    #     uv = cv.getTrackbarPos('UpperV',window_name)
-    #     upper_blue = np.array([uh,us,uv])
-    #     # get current positions of Lower HSCV trackbars
-    #     lh = cv.getTrackbarPos('LowerH',window_name)
-    #     ls = cv.getTrackbarPos('LowerS',window_name)
-    #     lv = cv.getTrackbarPos('LowerV',window_name)
-    #     upper_hsv = np.array([uh,us,uv])
-    #     lower_hsv = np.array([lh,ls,lv])
+        k = cv.waitKey(1) & 0xFF
+        if k == 27:
+            pass
+            break
+        # get current positions of Upper HSV trackbars
+        uh = cv.getTrackbarPos('UpperH',window_name)
+        us = cv.getTrackbarPos('UpperS',window_name)
+        uv = cv.getTrackbarPos('UpperV',window_name)
+        upper_blue = np.array([uh,us,uv])
+        # get current positions of Lower HSCV trackbars
+        lh = cv.getTrackbarPos('LowerH',window_name)
+        ls = cv.getTrackbarPos('LowerS',window_name)
+        lv = cv.getTrackbarPos('LowerV',window_name)
+        upper_hsv = np.array([uh,us,uv])
+        lower_hsv = np.array([lh,ls,lv])
 
-    #     time.sleep(.1)
+        time.sleep(.1)
 
-    # cv.destroyAllWindows()
+    cv.destroyAllWindows()
     
 def homography(hsv, img):
     """"

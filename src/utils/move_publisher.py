@@ -77,12 +77,12 @@ class MovePublisher:
         rospy.wait_for_service('/gazebo/set_model_state')
 
 
-    def center_of_road(self, masked_img, img = None):
+    def center_of_road(self, masked_img, off_road=False):
         """!
         @brief      Calculates the center of the road in the image.
 
         @param      masked_img: The already masked image to process.
-        @param      img: The original image to draw contours on. (optional)
+        @param      off_road: Whether or not the robot is off the road.
 
         @return     The center of the road in the image.
                     If img is not None, also returns the image with contours drawn on it.            
@@ -90,22 +90,33 @@ class MovePublisher:
                     None if the road is not detected.
         """
         height, width = masked_img.shape
-        y = int(height * 2 / 3)  # a third from the bottom of the image
+        y_values = [int(height * 2 / 3 + 20), int(height * 2 / 3), int(height * 1 / 2 + 10), int(height * 3 / 4)]  # Three different y values
         left_x = None
         right_x = None
+        center_x_sum = 0
+        count = 0
 
-        for x in range(width // 2):
-            if masked_img[y, x] == 255:
-                left_x = x
-                break
+        for y in y_values:
+            for x in range(width // 2):
+                if masked_img[y, x] == 255:
+                    left_x = x
+                    break
 
-        for x in range(width - 1, width // 2, -1):
-            if masked_img[y, x] == 255:
-                right_x = x
-                break
+            for x in range(width - 1, width // 2, -1):
+                if masked_img[y, x] == 255:
+                    right_x = x
+                    break
 
-        if left_x is not None and right_x is not None:
-            center_x = (left_x + right_x) // 2
-            return (center_x, y)
+            if left_x is not None and right_x is not None:
+                center_x = (left_x + right_x) // 2
+                if off_road:
+                    center_x_sum += center_x
+                    count += 1
+                else:
+                    return (center_x, y)
+
+        if off_road and count > 0:
+            average_center_x = center_x_sum // count
+            return (average_center_x, y_values[-1])
 
         return None

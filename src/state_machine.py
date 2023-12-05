@@ -11,6 +11,7 @@ from utils.image_subscriber import ImageSubscriber
 from utils.image_publisher import ImagePublisher
 
 from states.road import RoadDrivingState
+from states.off_road import OffRoadDrivingState
 
 class StateMachine():
     """!
@@ -35,7 +36,10 @@ class StateMachine():
         self.score_pub = ScorePublisher()
         self.camera = ImageSubscriber()
         self.debug = ImagePublisher()
+
         self.road = RoadDrivingState(self)
+        self.off_road = OffRoadDrivingState(self)
+        
         rospy.Timer(rospy.Duration(2), self.execute, oneshot=True)
         rospy.Timer(rospy.Duration(241), rospy.signal_shutdown, oneshot=True)
 
@@ -58,17 +62,29 @@ class StateMachine():
         """
         while not rospy.is_shutdown():
             if self.current_state == "start":
+                
                 self.score_pub.start()
 
                 self.transition_to(self.next_state)
 
             elif self.current_state == "idle":
+
                 self.move_pub.stop_publisher()
 
             elif self.current_state == "road":
                 
                 self.road.execute()
+                
+                if self.road.done():
+                    self.transition_to("off_road")
 
+            elif self.current_state == "off_road":
+
+                self.off_road.execute()
+
+                if self.off_road.done():
+                    self.transition_to("idle")
+                
             elif self.current_state == "respawn":
                 pass
 
