@@ -39,6 +39,8 @@ class StateMachine():
         rospy.Timer(rospy.Duration(2), self.execute, oneshot=True)
         rospy.Timer(rospy.Duration(241), rospy.signal_shutdown, oneshot=True)
 
+        self.start_time = rospy.get_time()
+
         rospy.on_shutdown(self.on_shutdown)
     
     def transition_to(self, new_state):
