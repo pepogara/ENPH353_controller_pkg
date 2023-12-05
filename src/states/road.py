@@ -25,7 +25,7 @@ class RoadDrivingState:
         self.past_area = 0
         self.hint_found = False
 
-        self.clue_num = 1
+        self.clue_num = 0
 
         self.model = ks.models.load_model("/home/fizzer/ros_ws/src/controller_pkg/nn_models/signNN_3.h5")
 
@@ -53,32 +53,47 @@ class RoadDrivingState:
 
         if self.current_substate == "follow_road":
 
-            # lines = 
+            if self.clue_num == 0:
+                self.state_machine.move_pub.move_publisher(0)
+                self.transition_to_substate("clue_board")
 
-            # self.state_machine.debug.publish(img, "mono8")
-            
-            self.state_machine.move_pub.move_publisher(0)
+            elif self.clue_num == 1:
+                self.state_machine.move_pub.move_publisher(0)
+                self.transition_to_substate("clue_board")
 
-            self.transition_to_substate("clue_board")
-
-            if self.clue_num == 3:
+            elif self.clue_num == 2:
                 self.state_machine.move_pub.stop_publisher()
-                self.transition_to_substate("teleport")
-                self.clue_num = 4
+                self.transition_to_substate("teleport1")
+                self.clue_num = 3
+
+            elif self.clue_num == 3:
+                self.state_machine.move_pub.move_publisher(0, -0.5)
+                self.transition_to_substate("clue_board")
+
+            elif self.clue_num == 4:
+                self.state_machine.move_pub.stop_publisher()
+                self.transition_to_substate("teleport2")
+                self.clue_num = 6
+
+            elif self.clue_num == 6:
+                self.state_machine.move_pub.move_publisher(0, -0.5)
+                self.transition_to_substate("clue_board")
+            
+            else:
+                self.state_machine.move_pub.stop_publisher()
                 
 
-            # self.state_machine.move_pub.move_publisher(output)
-
-
-        elif self.current_substate == "teleport":
+        elif self.current_substate == "teleport1":
             # Call the execute method of sub-state 2
-            self.state_machine.move_pub.teleport_to([0.50557, -0.027039, 0.1, 0, 0, -0.5, 0])
+            self.state_machine.move_pub.teleport_to([0.50557, -0.027039, 0.1, 90])
             rospy.sleep(0.5)
-            # self.transition_to_substate("follow_road")
-
-        elif self.current_substate == "truck_crossing":
+            self.transition_to_substate("follow_road")
+        
+        elif self.current_substate == "teleport2":
             # Call the execute method of sub-state 3
-            pass
+            self.state_machine.move_pub.teleport_to([-4.015, -2.299, 0.1, 0])
+            rospy.sleep(0.5)
+            self.transition_to_substate("follow_road")
 
         elif self.current_substate == "clue_board":
             # Call the execute method of sub-state 4
@@ -87,7 +102,7 @@ class RoadDrivingState:
             hint, area = imgt.homography(hsv, img)
             if hint is not None:
                 if (self.hint_found):
-                    self.state_machine.debug.publish(self.past_hint, "bgr8")
+                    # self.state_machine.debug.publish(self.past_hint, "bgr8")
                     pass
                 else:
                     if self.past_hint is not None:
@@ -97,8 +112,8 @@ class RoadDrivingState:
                         else:
                             self.hint_found = True
                             clue = self.clue_detect(self.past_hint)
-                            self.state_machine.score_pub.clue_publisher(clue, self.clue_num)
                             self.clue_num += 1
+                            self.state_machine.score_pub.clue_publisher(clue, self.clue_num)
 
                     else:
                         self.past_hint = hint

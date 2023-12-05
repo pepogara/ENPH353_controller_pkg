@@ -6,6 +6,7 @@ from gazebo_msgs.msg import ModelState
 from gazebo_msgs.srv import SetModelState
 import cv2
 import numpy as np
+from tf.transformations import quaternion_from_euler
 
 class MovePublisher:
     """!
@@ -26,14 +27,14 @@ class MovePublisher:
         self.rate = rospy.Rate(30)
         self.teleport = rospy.ServiceProxy('/gazebo/set_model_state', SetModelState)
 
-    def move_publisher(self, z):
+    def move_publisher(self, z, x = 0.5):
         """!
         @brief      Publishes movement commands to control the robot's movement.
 
         @param      z (float): Angular velocity command. (negative for right, positive for left)
         """
         move = Twist()
-        move.linear.x = .5
+        move.linear.x = x
         move.angular.z = z
 
         self.move_pub.publish(move)
@@ -50,6 +51,7 @@ class MovePublisher:
         self.move_pub.publish(stop)
         self.rate.sleep()
 
+
     def teleport_to(self, position):
         """!
         @brief      Spawns the robot at the given position.
@@ -57,16 +59,18 @@ class MovePublisher:
         @param      position (list): The position to spawn the robot at.
         """
 
+        x, y, z, w = quaternion_from_euler(0, 0, np.radians(position[3]))
+
         msg = ModelState()
         msg.model_name = 'R1'
 
         msg.pose.position.x = position[0]
         msg.pose.position.y = position[1]
         msg.pose.position.z = position[2]
-        msg.pose.orientation.x = position[3]
-        msg.pose.orientation.y = position[4]
-        msg.pose.orientation.z = position[5]
-        msg.pose.orientation.w = position[6]
+        msg.pose.orientation.x = x
+        msg.pose.orientation.y = y
+        msg.pose.orientation.z = z
+        msg.pose.orientation.w = w
 
         self.teleport(msg)
 
