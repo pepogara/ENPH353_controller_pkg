@@ -20,7 +20,7 @@ class RoadDrivingState:
         @brief      Constructs a new instance.
         """
         self.state_machine = state_machine
-        self.current_substate = "clue_board"
+        self.current_substate = "follow_road"
         self.past_hint = None
         self.past_area = 0
         self.hint_found = False
@@ -59,7 +59,6 @@ class RoadDrivingState:
             
             self.state_machine.move_pub.move_publisher(0)
 
-
             self.transition_to_substate("clue_board")
 
             if self.clue_num == 3:
@@ -73,9 +72,9 @@ class RoadDrivingState:
 
         elif self.current_substate == "teleport":
             # Call the execute method of sub-state 2
-            self.state_machine.move_pub.teleport_to([0.50557, -0.027039, 0.1, 0, 0, 0, 0])
+            self.state_machine.move_pub.teleport_to([0.50557, -0.027039, 0.1, 0, 0, -0.5, 0])
             rospy.sleep(0.5)
-            self.transition_to_substate("follow_road")
+            # self.transition_to_substate("follow_road")
 
         elif self.current_substate == "truck_crossing":
             # Call the execute method of sub-state 3

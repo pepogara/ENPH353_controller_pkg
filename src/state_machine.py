@@ -66,7 +66,7 @@ class StateMachine():
                 self.move_pub.stop_publisher()
 
             elif self.current_state == "road":
-
+                
                 self.road.execute()
 
             elif self.current_state == "respawn":
