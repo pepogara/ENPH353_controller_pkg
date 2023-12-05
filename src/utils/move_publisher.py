@@ -27,7 +27,7 @@ class MovePublisher:
         self.rate = rospy.Rate(30)
         self.teleport = rospy.ServiceProxy('/gazebo/set_model_state', SetModelState)
 
-    def move_publisher(self, z, x = 0.5):
+    def move_publisher(self, z, x = 0.4):
         """!
         @brief      Publishes movement commands to control the robot's movement.
 

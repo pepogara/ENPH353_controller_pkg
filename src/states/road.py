@@ -6,6 +6,7 @@ import sys
 import cv2
 
 from tensorflow import keras as ks
+import tensorflow as tf
 
 import utils.image_treaiting as imgt
 
@@ -25,6 +26,8 @@ class RoadDrivingState:
         self.past_area = 0
         self.hint_found = False
 
+        self.read_clues =[]
+
         self.clue_num = 0
 
         self.model = ks.models.load_model("/home/fizzer/ros_ws/src/controller_pkg/nn_models/signNN_3.h5")
@@ -34,7 +37,7 @@ class RoadDrivingState:
 
         self.Kp = 0.02
         self.Ki = 0.00
-        self.Kd = 0.01
+        self.Kd = 0.015
 
 
     def transition_to_substate(self, substate):
@@ -56,7 +59,7 @@ class RoadDrivingState:
 
             # imgt.HSV(img, "road")
 
-            # self.state_machine.debug.publish(result, "bgr8")
+            self.state_machine.debug.publish(lines, "8UC1")
 
             center = self.state_machine.move_pub.center_of_road(lines)
             
@@ -127,7 +130,7 @@ class RoadDrivingState:
             hint, area = imgt.homography(hsv, img)
             if hint is not None:
                 if (self.hint_found):
-                    self.state_machine.debug.publish(self.past_hint, "bgr8")
+                    # self.state_machine.debug.publish(self.past_hint, "bgr8")
                     pass
                 else:
                     if self.past_hint is not None:
@@ -136,11 +139,12 @@ class RoadDrivingState:
                             self.past_area = area
                         else:
                             self.hint_found = True
-                            clue = self.clue_detect(self.past_hint)
                             clue_type = self.type_detect(self.past_hint)
-                            self.clue_num += 1
-                            self.state_machine.score_pub.clue_publisher(clue, clue_type)
-
+                            if clue_type not in self.read_clues:
+                                clue = self.clue_detect(self.past_hint)
+                                self.read_clues.append(clue_type)
+                                self.clue_num += 1
+                                self.state_machine.score_pub.clue_publisher(clue, clue_type)
                     else:
                         self.past_hint = hint
                         self.past_area = area
@@ -149,7 +153,7 @@ class RoadDrivingState:
                 self.hint_found = False
                 self.past_hint = None
                 self.past_area = 0
-                self.state_machine.debug.publish(img, "bgr8")
+                # self.state_machine.debug.publish(img, "bgr8")
 
             self.transition_to_substate("pid")
 
@@ -195,8 +199,6 @@ class RoadDrivingState:
         word = ''.join(decoded_chars).rstrip()
 
         similar = self.state_machine.score_pub.most_similar_string(word)
-
-        print(similar)
 
         index = self.state_machine.score_pub.all_clue_types.index(similar) + 1
 
