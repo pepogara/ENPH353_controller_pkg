@@ -77,12 +77,11 @@ class MovePublisher:
         rospy.wait_for_service('/gazebo/set_model_state')
 
 
-    def center_of_road(self, masked_img, threshold=200, img = None):
+    def center_of_road(self, masked_img, img = None):
         """!
         @brief      Calculates the center of the road in the image.
 
         @param      masked_img: The already masked image to process.
-        @param      threshold: The threshold for the minimum area of a contour to be considered significant.
         @param      img: The original image to draw contours on. (optional)
 
         @return     The center of the road in the image.
@@ -90,50 +89,23 @@ class MovePublisher:
         
                     None if the road is not detected.
         """
-        # Find contours
-        contours, _ = cv2.findContours(masked_img, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        height, width = masked_img.shape
+        y = int(height * 2 / 3)  # a third from the bottom of the image
+        left_x = None
+        right_x = None
 
-        # Calculate center of significant contours about a third of the way up in the y-axis
-        height, width = masked_img.shape[:2]
-        roi_y = height // 3  # Adjust this value for the desired y-axis position
+        for x in range(width // 2):
+            if masked_img[y, x] == 255:
+                left_x = x
+                break
 
-        significant_contours = []
+        for x in range(width - 1, width // 2, -1):
+            if masked_img[y, x] == 255:
+                right_x = x
+                break
 
-        for contour in contours:
-            # Get bounding rectangle for the contour
-            x, y, w, h = cv2.boundingRect(contour)
+        if left_x is not None and right_x is not None:
+            center_x = (left_x + right_x) // 2
+            return (center_x, y)
 
-            # Calculate center of the contour
-            center_x = x + (w // 2)
-            center_y = y + (h // 2)
-
-            # Check if the contour is within the region of interest and its area is significant
-            if y < roi_y and cv2.contourArea(contour) > threshold:  # Adjust threshold accordingly
-                significant_contours.append(contour)
-
-        # Calculate average center point
-        if significant_contours:
-            center_points = [((cv2.boundingRect(cnt)[0] + cv2.boundingRect(cnt)[2] // 2),
-                            (cv2.boundingRect(cnt)[1] + cv2.boundingRect(cnt)[3] // 2)) for cnt in significant_contours]
-
-            avg_center = np.mean(center_points, axis=0)
-            avg_center = tuple(map(int, avg_center))
-
-            if img.all() != None:
-                # Draw contours on the image
-                contour_image = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
-                cv2.drawContours(contour_image, significant_contours, -1, (0, 255, 0), 2)
-
-                # Draw a point at the calculated center
-                cv2.circle(contour_image, avg_center, 5, (0, 0, 255), -1)
-                return avg_center, contour_image
-            else:
-                return avg_center    
-                
-        else:
-            print("No significant contours found within the region of interest.")
-
-            if img.all() != None:
-                return None, img
-            else:
-                return None
+        return None

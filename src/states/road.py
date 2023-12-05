@@ -20,7 +20,7 @@ class RoadDrivingState:
         @brief      Constructs a new instance.
         """
         self.state_machine = state_machine
-        self.current_substate = "follow_road"
+        self.current_substate = "pid"
         self.past_hint = None
         self.past_area = 0
         self.hint_found = False
@@ -51,7 +51,32 @@ class RoadDrivingState:
 
         img = self.state_machine.camera.get_frame()
 
-        if self.current_substate == "follow_road":
+        if self.current_substate == "pid":
+            lines = imgt.HSV(img, "road")
+
+            # imgt.HSV(img, "road")
+
+            # self.state_machine.debug.publish(result, "bgr8")
+
+            center = self.state_machine.move_pub.center_of_road(lines)
+            
+            if center is not None:
+                error = img.shape[1] // 2 - center[0]
+            else:
+                error = 75
+
+            self.integral += error
+            derivative = error - self.previous_error
+        
+            output = (self.Kp * error) + (self.Ki * self.integral) + (self.Kd * derivative)
+
+            self.previous_error = error
+
+            self.state_machine.move_pub.move_publisher(output)
+
+            self.transition_to_substate("clue_board")
+
+        elif self.current_substate == "hardcode":
 
             if self.clue_num == 0:
                 self.state_machine.move_pub.move_publisher(0)
@@ -87,13 +112,13 @@ class RoadDrivingState:
             # Call the execute method of sub-state 2
             self.state_machine.move_pub.teleport_to([0.50557, -0.027039, 0.1, 90])
             rospy.sleep(0.5)
-            self.transition_to_substate("follow_road")
+            self.transition_to_substate("hardcode")
         
         elif self.current_substate == "teleport2":
             # Call the execute method of sub-state 3
             self.state_machine.move_pub.teleport_to([-4.015, -2.299, 0.1, 0])
             rospy.sleep(0.5)
-            self.transition_to_substate("follow_road")
+            self.transition_to_substate("hardcode")
 
         elif self.current_substate == "clue_board":
             # Call the execute method of sub-state 4
@@ -102,7 +127,7 @@ class RoadDrivingState:
             hint, area = imgt.homography(hsv, img)
             if hint is not None:
                 if (self.hint_found):
-                    # self.state_machine.debug.publish(self.past_hint, "bgr8")
+                    self.state_machine.debug.publish(self.past_hint, "bgr8")
                     pass
                 else:
                     if self.past_hint is not None:
@@ -112,8 +137,9 @@ class RoadDrivingState:
                         else:
                             self.hint_found = True
                             clue = self.clue_detect(self.past_hint)
+                            clue_type = self.type_detect(self.past_hint)
                             self.clue_num += 1
-                            self.state_machine.score_pub.clue_publisher(clue, self.clue_num)
+                            self.state_machine.score_pub.clue_publisher(clue, clue_type)
 
                     else:
                         self.past_hint = hint
@@ -125,7 +151,7 @@ class RoadDrivingState:
                 self.past_area = 0
                 self.state_machine.debug.publish(img, "bgr8")
 
-            self.transition_to_substate("follow_road")
+            self.transition_to_substate("pid")
 
     def clue_detect(self, hint):
         """!
@@ -147,5 +173,32 @@ class RoadDrivingState:
         word = ''.join(decoded_chars).rstrip()
 
         return word
+    
+    def type_detect(self, hint):
+        """!
+        @brief      Detects the type of clue in the clue board.
 
+        @param      hint  The hint image
+
+        @return     The index of the type of clue
+        """
+
+        characters = imgt.character_split(hint, False)
+        decoded_chars = []
+
+        for char in characters:
+            prediction = self.model.predict(char)
+            single_dig = imgt.onehotToStr(prediction)
+            decoded_chars.append(single_dig)
+
+
+        word = ''.join(decoded_chars).rstrip()
+
+        similar = self.state_machine.score_pub.most_similar_string(word)
+
+        print(similar)
+
+        index = self.state_machine.score_pub.all_clue_types.index(similar) + 1
+
+        return index
         
