@@ -273,7 +273,7 @@ def character_split(img, clue=True):
     end_x = 75 if clue else 295
     increment = 45
 
-    num_chars = 11 if clue else 5
+    num_chars = 12 if clue else 5
 
     characters = []
 
