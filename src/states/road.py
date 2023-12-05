@@ -68,9 +68,6 @@ class RoadDrivingState:
 
             elif self.clue_num == 3:
                 self.state_machine.move_pub.move_publisher(0, -0.5)
-                rospy.sleep(1.7)
-                self.state_machine.move_pub.stop_publisher()
-                rospy.sleep(0.5)
                 self.transition_to_substate("clue_board")
 
             elif self.clue_num == 4:
@@ -80,9 +77,6 @@ class RoadDrivingState:
 
             elif self.clue_num == 6:
                 self.state_machine.move_pub.move_publisher(0, -0.5)
-                rospy.sleep(1)
-                self.state_machine.move_pub.stop_publisher()
-                rospy.sleep(0.5)
                 self.transition_to_substate("clue_board")
             
             else:
