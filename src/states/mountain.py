@@ -19,12 +19,15 @@ class MountainDrivingState:
         """
         self.state_machine = state_machine
         self.current_substate = "backward_hard"
+        self.next_substate = "backward_hard"
         self.past_hint = None
         self.past_area = 0
         self.hint_found = False
 
         self.first_clue = True
         self.read_clues = []
+
+        self.first_clue = False
 
         self.last_clue = False
 
@@ -52,8 +55,23 @@ class MountainDrivingState:
 
         img = self.state_machine.camera.get_frame()
 
-        if self.current_substate == "pid":
-            lines = imgt.HSV(img, "off_road")
+        if self.current_substate == "backward_hard":
+            self.state_machine.move_pub.move_publisher(0, -0.2)
+            self.transition_to_substate("clue_board")
+
+            if self.first_clue:
+                self.next_substate = "pid"
+                self.tunnel_time = rospy.get_time()
+                self.transition_to_substate("forward_hard")
+
+        elif self.current_substate == "forward_hard":
+            self.state_machine.move_pub.move_publisher(0, 0.4)
+
+            if rospy.get_time() - 7 > self.tunnel_time:
+                self.transition_to_substate("pid")
+                
+        elif self.current_substate == "pid":
+            lines = imgt.HSV(img, "mountain")
 
             self.state_machine.debug.publish(lines, "8UC1")
 
@@ -71,15 +89,9 @@ class MountainDrivingState:
 
             self.previous_error = error
 
-            self.state_machine.move_pub.move_publisher(output, 0.3)
+            self.state_machine.move_pub.move_publisher(output, 0.5)
 
             self.transition_to_substate("clue_board")
-
-        elif self.current_substate == "tunnel":
-            pass
-
-        elif self.current_substate == "backward_hard":
-            imgt.HSV(img, "off_road", False)
 
         elif self.current_substate == "clue_board":
             # Call the execute method of sub-state 4
@@ -104,6 +116,10 @@ class MountainDrivingState:
                                 self.read_clues.append(clue_type)
                                 self.state_machine.score_pub.clue_publisher(clue, clue_type)
 
+                                if clue_type == 7: # to check if the first clue on the road is read
+                                    self.first_clue = True
+                                    self.last_clue = True
+
                                 if clue_type == 8: # to check if the last clue on the road is read
                                     self.last_clue = True
                                     self.state_machine.move_pub.stop_publisher()
@@ -118,7 +134,10 @@ class MountainDrivingState:
                 self.past_area = 0
                 # self.state_machine.debug.publish(img, "bgr8")
 
-            self.transition_to_substate("pid")
+            self.transition_to_substate(self.next_substate)
+
+        elif self.current_substate == "debug":
+            imgt.HSV(img, "mountain", False)
 
     def clue_detect(self, hint):
         """!
@@ -161,7 +180,7 @@ class MountainDrivingState:
 
         word = ''.join(decoded_chars).rstrip()
 
-        similar = self.state_machine.score_pub.most_similar_string(word, "off_road")
+        similar = self.state_machine.score_pub.most_similar_string(word, "mountain")
 
         index = self.state_machine.score_pub.all_clue_types.index(similar) + 1
 
