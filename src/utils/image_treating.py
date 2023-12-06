@@ -38,9 +38,13 @@ def HSV(img, key, val=True):
             "upper": np.array([35, 79, 255]),
             "lower": np.array([10, 41, 185])
         },
-        "mountain": {
-            "upper": np.array([35, 100, 232]),
-            "lower": np.array([0, 0, 155])
+        "mountain_dark": {
+            "upper": np.array([35, 81, 203]),
+            "lower": np.array([10, 53, 165])
+        },
+        "mountain_light": {
+            "upper": np.array([35, 79, 234]),
+            "lower": np.array([10, 25, 180])
         }
 
     }
