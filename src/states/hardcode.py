@@ -110,7 +110,10 @@ class HardcodeDrivingState:
                             self.past_area = area
                         else:
                             self.hint_found = True
-                            clue_type = self.type_detect(self.past_hint)
+                            if self.clue_num < 4:
+                                clue_type = self.type_detect(self.past_hint, "road")
+                            else:
+                                clue_type = self.type_detect(self.past_hint, "mountain")
                             print(clue_type)
                             if clue_type not in self.read_clues:
                                 clue = self.clue_detect(self.past_hint)
@@ -150,7 +153,7 @@ class HardcodeDrivingState:
 
         return word
     
-    def type_detect(self, hint):
+    def type_detect(self, hint, state):
         """!
         @brief      Detects the type of clue in the clue board.
 
@@ -170,7 +173,7 @@ class HardcodeDrivingState:
 
         word = ''.join(decoded_chars).rstrip()
 
-        similar = self.state_machine.score_pub.most_similar_string(word, "road")
+        similar = self.state_machine.score_pub.most_similar_string(word, state)
 
         index = self.state_machine.score_pub.all_clue_types.index(similar) + 1
 
