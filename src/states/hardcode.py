@@ -99,6 +99,7 @@ class HardcodeDrivingState:
 
             hsv = imgt.HSV(img, "clue")
             hint, area = imgt.homography(hsv, img)
+            # print(area)
             if hint is not None:
                 if (self.hint_found):
                     # self.state_machine.debug.publish(self.past_hint, "bgr8")
