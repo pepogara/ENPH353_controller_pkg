@@ -98,6 +98,7 @@ class HardcodeDrivingState:
 
             hsv = imgt.HSV(img, "clue")
             hint, area = imgt.homography(hsv, img)
+            # print(area)
             if hint is not None:
                 if (self.hint_found):
                     # self.state_machine.debug.publish(self.past_hint, "bgr8")
@@ -109,7 +110,8 @@ class HardcodeDrivingState:
                             self.past_area = area
                         else:
                             self.hint_found = True
-                            clue_type = self.type_detect(self.past_hint)
+                            clue_type = self.type_detect(self.past_hint, "road")
+                            print(clue_type)
                             if clue_type not in self.read_clues:
                                 clue = self.clue_detect(self.past_hint)
                                 self.read_clues.append(clue_type)
@@ -148,7 +150,7 @@ class HardcodeDrivingState:
 
         return word
     
-    def type_detect(self, hint):
+    def type_detect(self, hint, state):
         """!
         @brief      Detects the type of clue in the clue board.
 
@@ -168,7 +170,7 @@ class HardcodeDrivingState:
 
         word = ''.join(decoded_chars).rstrip()
 
-        similar = self.state_machine.score_pub.most_similar_string(word)
+        similar = self.state_machine.score_pub.most_similar_string(word, state)
 
         index = self.state_machine.score_pub.all_clue_types.index(similar) + 1
 

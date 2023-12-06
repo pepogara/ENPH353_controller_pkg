@@ -5,7 +5,7 @@ import cv2
 
 from tensorflow import keras as ks
 
-import utils.image_treaiting as imgt
+import utils.image_treating as imgt
 
 
 class MountainDrivingState:
