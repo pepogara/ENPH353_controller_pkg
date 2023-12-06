@@ -6,7 +6,7 @@ import rospy
 
 from tensorflow import keras as ks
 
-import utils.image_treaiting as imgt
+import utils.image_treating as imgt
 
 
 class RoadDrivingState:
@@ -58,7 +58,7 @@ class RoadDrivingState:
 
             # imgt.HSV(img, "road")
 
-            self.state_machine.debug.publish(lines, "8UC1")
+            self.state_machine.debug.publish(lines, "mono8")
 
             center = self.state_machine.move_pub.center_of_road(lines)
             

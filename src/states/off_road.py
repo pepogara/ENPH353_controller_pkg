@@ -5,7 +5,7 @@ import cv2
 
 from tensorflow import keras as ks
 
-import utils.image_treaiting as imgt
+import utils.image_treating as imgt
 
 
 class OffRoadDrivingState:
@@ -55,7 +55,7 @@ class OffRoadDrivingState:
         if self.current_substate == "pid":
             lines = imgt.HSV(img, "off_road")
 
-            self.state_machine.debug.publish(lines, "8UC1")
+            self.state_machine.debug.publish(lines, "mono8")
 
             center = self.state_machine.move_pub.center_of_road(lines, True)
             
