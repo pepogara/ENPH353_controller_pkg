@@ -12,6 +12,7 @@ from utils.image_publisher import ImagePublisher
 
 from states.road import RoadDrivingState
 from states.off_road import OffRoadDrivingState
+from states.hardcode import HardcodeDrivingState
 
 class StateMachine():
     """!
@@ -39,6 +40,7 @@ class StateMachine():
 
         self.road = RoadDrivingState(self)
         self.off_road = OffRoadDrivingState(self)
+        self.hardcode = HardcodeDrivingState(self)
         
         rospy.Timer(rospy.Duration(2), self.execute, oneshot=True)
         rospy.Timer(rospy.Duration(241), rospy.signal_shutdown, oneshot=True)
@@ -84,6 +86,10 @@ class StateMachine():
 
                 if self.off_road.done():
                     self.transition_to("idle")
+            
+            elif self.current_state == "hardcode":
+
+                self.hardcode.execute()
                 
             elif self.current_state == "respawn":
                 pass
@@ -117,7 +123,7 @@ def main(args):
 
     """
     try:
-        robot = StateMachine()
+        robot = StateMachine("hardcode")
         robot.spin()
 
         #TODO: Add some command line arguments to start the robot in a specific state or smthn

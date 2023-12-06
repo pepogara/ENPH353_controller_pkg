@@ -8,9 +8,9 @@ import cv2
 from tensorflow import keras as ks
 import tensorflow as tf
 
-import utils.image_treaiting as imgt
+import utils.image_treating as imgt
 
-class HardcoreDrivingState:
+class HardcodeDrivingState:
     """!
     @brief      Class for road driving.
     """
@@ -100,7 +100,7 @@ class HardcoreDrivingState:
             hint, area = imgt.homography(hsv, img)
             if hint is not None:
                 if (self.hint_found):
-                    self.state_machine.debug.publish(self.past_hint, "bgr8")
+                    # self.state_machine.debug.publish(self.past_hint, "bgr8")
                     pass
                 else:
                     if self.past_hint is not None:
@@ -123,7 +123,7 @@ class HardcoreDrivingState:
                 self.hint_found = False
                 self.past_hint = None
                 self.past_area = 0
-                self.state_machine.debug.publish(img, "bgr8")
+                # self.state_machine.debug.publish(img, "bgr8")
 
             self.transition_to_substate("hardcode")
 
