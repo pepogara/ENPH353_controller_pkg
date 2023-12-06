@@ -1,7 +1,6 @@
-#! /usr/bin/env python3
-
 import rospy
 from std_msgs.msg import String
+from typing import List, Union
 
 class ScorePublisher:
     """!
@@ -23,11 +22,14 @@ class ScorePublisher:
         self.TEAM_PASSWORD = "password"
 
         self.all_clue_types = ['SIZE', 'VICTIM', 'CRIME', 'TIME', 'PLACE', 'MOTIVE', 'WEAPON', 'BANDIT']
-        self.road_clue_types = self.all_clue_types[0:4]
-        self.off_road_clue_types = self.all_clue_types[3:6] #time type is also in this due to state machine transition
-        self.mountain_clue_types = self.all_clue_types[6:8]
+        self.clue_types = {
+            "road": self.all_clue_types[0:4],
+            "off_road": self.all_clue_types[3:6],
+            "mountain": self.all_clue_types[6:8],
+            "all": self.all_clue_types
+        }
 
-    def clue_publisher(self, clue, score):
+    def clue_publisher(self, clue: str, score: int):
         """!
         @brief      Publishes the score to the score_tracker topic.
 
@@ -40,18 +42,18 @@ class ScorePublisher:
         """!
         @brief      Starts the timer for the simulation.
         """
-        self.score_pub.publish(F"{self.TEAM_NAME},{self.TEAM_PASSWORD},0,")
-        
+        self.score_pub.publish(f"{self.TEAM_NAME},{self.TEAM_PASSWORD},0,")
+
     def stop(self):
         """!
         @brief      Stops the timer for the simulation.
         """
-        self.score_pub.publish(F"{self.TEAM_NAME},{self.TEAM_PASSWORD},-1,")
+        self.score_pub.publish(f"{self.TEAM_NAME},{self.TEAM_PASSWORD},-1,")
 
-    def levenshtein_distance(self, string1, string2):
+    def levenshtein_distance(self, string1: str, string2: str) -> int:
         """!
         @brief      Calculates the Levenshtein distance between two strings.
-        
+
         @param      string1 (string): The first string.
         @param      string2 (string): The second string.
 
@@ -74,19 +76,19 @@ class ScorePublisher:
 
         return matrix[len(string1)][len(string2)]
 
-    def most_similar_string(self, target, state):
+    def most_similar_string(self, target: str, state: str) -> Union[str, None]:
         """!
         @brief      Finds the most similar string to the target string.
-        
+
         @param      target (string): The target string.
         @param      state (string): The state the robot is in.
-        
+
         @return     The most similar string to the target string.
         """
         min_distance = float('inf')
         most_similar = None
 
-        clue_list = self.road_clue_types if state == "road" else self.off_road_clue_types if state == "off_road" else self.mountain_clue_types
+        clue_list = self.clue_types.get(state, self.all_clue_types)
 
         for string in clue_list:
             distance = self.levenshtein_distance(target, string)

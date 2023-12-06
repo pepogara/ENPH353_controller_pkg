@@ -133,7 +133,7 @@ def main(args):
 
     """
     try:
-        robot = StateMachine("hardcode")
+        robot = StateMachine()
         robot.spin()
 
         #TODO: Add some command line arguments to start the robot in a specific state or smthn
