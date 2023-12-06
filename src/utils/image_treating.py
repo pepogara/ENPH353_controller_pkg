@@ -35,8 +35,8 @@ def HSV(img, key, val=True):
             "lower": np.array([118, 50, 75])
         },
         "off_road": {
-            "upper": np.array([105, 83, 237]),
-            "lower": np.array([0, 0, 179])
+            "upper": np.array([35, 79, 255]),
+            "lower": np.array([10, 41, 185])
         },
         "mountain": {
             "upper": np.array([35, 100, 232]),
