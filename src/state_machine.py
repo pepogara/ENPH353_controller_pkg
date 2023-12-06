@@ -80,7 +80,7 @@ class StateMachine():
                 self.road.execute()
                 
                 if self.road.done():
-                    self.transition_to("off_road")
+                    self.transition_to("mountain_teleport")
 
             elif self.current_state == "off_road":
 

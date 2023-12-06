@@ -38,9 +38,13 @@ def HSV(img, key, val=True):
             "upper": np.array([35, 79, 255]),
             "lower": np.array([10, 41, 185])
         },
-        "mountain": {
-            "upper": np.array([35, 100, 232]),
-            "lower": np.array([0, 0, 155])
+        "mountain_dark": {
+            "upper": np.array([35, 81, 203]),
+            "lower": np.array([10, 53, 165])
+        },
+        "mountain_light": {
+            "upper": np.array([35, 79, 234]),
+            "lower": np.array([10, 25, 180])
         }
 
     }
@@ -50,6 +54,8 @@ def HSV(img, key, val=True):
 
     # Threshold the HSV image to get the mask
     mask = cv.inRange(hsv, lower_hsv, upper_hsv)
+    # x_vals = [int(mask.shape[1]/4), int(mask.shape[1]*3/4)]
+    # [cv.line(mask, (x,0), (x,mask.shape[0]-1), (255,255,255), 3) for x in x_vals]
 
     if val:
         return mask

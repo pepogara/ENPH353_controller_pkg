@@ -67,13 +67,23 @@ class MountainDrivingState:
         elif self.current_substate == "forward_hard":
             self.state_machine.move_pub.move_publisher(0, 0.4)
 
-            if rospy.get_time() - 7 > self.tunnel_time:
+            if rospy.get_time() - 6.5 > self.tunnel_time:
+                self.pid_time = rospy.get_time()
                 self.transition_to_substate("pid")
                 
-        elif self.current_substate == "pid":
-            lines = imgt.HSV(img, "mountain")
+        elif self.current_substate == "turn_hard":
+            self.state_machine.move_pub.move_publisher(0.6, 0.3)
 
-            self.state_machine.debug.publish(lines, "8UC1")
+            if rospy.get_time() - self.top_time > 1:
+                self.transition_to_substate("pid")
+
+        elif self.current_substate == "pid":
+            if rospy.get_time() - self.pid_time > 7:
+                lines = imgt.HSV(img, "mountain_light", True)
+            else:
+                lines = imgt.HSV(img, "mountain_dark", True)
+
+            self.state_machine.debug.publish(lines, "mono8")
 
             center = self.state_machine.move_pub.center_of_road(lines, True)
             
@@ -93,12 +103,17 @@ class MountainDrivingState:
 
             self.transition_to_substate("clue_board")
 
+            if rospy.get_time() - self.pid_time > 14:
+                self.top_time = rospy.get_time()
+                self.transition_to_substate("turn_hard")
+
         elif self.current_substate == "clue_board":
             # Call the execute method of sub-state 4
 
             hsv = imgt.HSV(img, "clue")
             hint, area = imgt.homography(hsv, img)
             if hint is not None:
+                self.state_machine.debug.publish(hint, "bgr8")
                 if (self.hint_found):
                     # self.state_machine.debug.publish(self.past_hint, "bgr8")
                     pass
@@ -118,7 +133,7 @@ class MountainDrivingState:
 
                                 if clue_type == 7: # to check if the first clue on the road is read
                                     self.first_clue = True
-                                    self.last_clue = True
+                                    # self.last_clue = True
 
                                 if clue_type == 8: # to check if the last clue on the road is read
                                     self.last_clue = True

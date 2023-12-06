@@ -53,6 +53,7 @@ class RoadDrivingState:
         """
 
         img = self.state_machine.camera.get_frame()
+        self.current_substate = "teleport_mountain"
 
         if self.current_substate == "pid":
             lines = imgt.HSV(img, "road")
@@ -119,6 +120,9 @@ class RoadDrivingState:
                 # self.state_machine.debug.publish(img, "bgr8")
 
             self.transition_to_substate(self.next_substate)
+        
+        elif self.current_substate == "teleport_mountain":
+            self.last_clue = True
 
 
     def clue_detect(self, hint):
