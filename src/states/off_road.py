@@ -55,7 +55,7 @@ class OffRoadDrivingState:
         if self.current_substate == "pid":
             lines = imgt.HSV(img, "off_road")
 
-            self.state_machine.debug.publish(lines, "mono8")
+            # self.state_machine.debug.publish(lines, "mono8")
 
             center = self.state_machine.move_pub.center_of_road(lines, True)
             

@@ -121,15 +121,15 @@ def HSV(img, key, val=True):
     cv.destroyAllWindows()
     
 def homography(hsv, img):
-    """"
-    Function to apply perspective transform to image
-    to isolate hint
+    """!
+    @brief      Function to apply perspective transform to image
+                to isolate hint
 
-    Parameters: hsv - masked image used to get the transform 
-                img - original image that transform will be applied to
+    @param      hsv - masked image used to get the transform 
+    @param      img - original image that transform will be applied to
 
-    Returns: transformed_img - full color image with perspective transform applied
-             None - if no hint is found, or if the hint is too small
+    @return     transformed_img - full color image with perspective transform applied
+                None - if no hint is found, or if the hint is too small
     """
 
     """First get the transform for the outer contour"""
@@ -146,7 +146,7 @@ def homography(hsv, img):
     
     # ignores contours that are too small
     contourArea = cv.contourArea(largest_contour)
-    if contourArea < 20000:
+    if contourArea < 15000: #changed from 20
         # print("Hint too small")
         return None, 0
 
