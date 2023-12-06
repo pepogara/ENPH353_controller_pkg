@@ -26,6 +26,7 @@ class ScorePublisher:
             "road": self.all_clue_types[0:4],
             "off_road": self.all_clue_types[3:6],
             "mountain": self.all_clue_types[6:8],
+            "hardcode": [self.all_clue_types[0], self.all_clue_types[1], self.all_clue_types[3], self.all_clue_types[6]],
             "all": self.all_clue_types
         }
 
@@ -42,13 +43,13 @@ class ScorePublisher:
         """!
         @brief      Starts the timer for the simulation.
         """
-        self.score_pub.publish(f"{self.TEAM_NAME},{self.TEAM_PASSWORD},0,")
+        self.score_pub.publish(f"{self.TEAM_NAME},{self.TEAM_PASSWORD},0,N/a")
 
     def stop(self):
         """!
         @brief      Stops the timer for the simulation.
         """
-        self.score_pub.publish(f"{self.TEAM_NAME},{self.TEAM_PASSWORD},-1,")
+        self.score_pub.publish(f"{self.TEAM_NAME},{self.TEAM_PASSWORD},-1,N/a")
 
     def levenshtein_distance(self, string1: str, string2: str) -> int:
         """!

@@ -19,7 +19,8 @@ class StateMachine():
     """!
     @brief      State machine class for the robot.
 
-    This class represents a state machine for the robot. It contains the logic for transitioning between states and executing the current state.
+    This class represents a state machine for the robot. It contains the logic for 
+    transitioning between states and executing the current state.
     """
     def __init__(self, first_state="road"):
         """!
@@ -44,8 +45,11 @@ class StateMachine():
         self.mountain = MountainDrivingState(self)
         self.hardcode = HardcodeDrivingState(self)
         
-        rospy.Timer(rospy.Duration(2), self.execute, oneshot=True)
+        rospy.Timer(rospy.Duration(3), self.execute, oneshot=True)
         rospy.Timer(rospy.Duration(241), rospy.signal_shutdown, oneshot=True)
+
+        self.backup = rospy.get_time()
+        self.RESTART_TIME = 75
 
         self.start_time = rospy.get_time()
 
@@ -69,6 +73,8 @@ class StateMachine():
                 
                 self.score_pub.start()
 
+                rospy.sleep(3)
+
                 self.transition_to(self.next_state)
 
             elif self.current_state == "idle":
@@ -82,16 +88,29 @@ class StateMachine():
                 if self.road.done():
                     self.transition_to("off_road")
 
+                if rospy.get_time() - self.backup > self.RESTART_TIME:
+                    self.transition_to("not_finished_yet")
+
             elif self.current_state == "off_road":
 
                 self.off_road.execute()
 
                 if self.off_road.done():
                     self.transition_to("mountain_teleport")
+
+                if rospy.get_time() - self.backup > self.RESTART_TIME:
+                    self.transition_to("not_finished_yet")
             
             elif self.current_state == "hardcode":
 
                 self.hardcode.execute()
+
+                if self.hardcode.done():
+                    rospy.signal_shutdown("Done")
+
+            elif self.current_state == "not_finished_yet":
+                self.hardcode.clue_num = 2
+                self.transition_to("hardcode")
                 
             elif self.current_state == "mountain_teleport":
 

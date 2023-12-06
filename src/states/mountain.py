@@ -119,6 +119,8 @@ class MountainDrivingState:
                                 if clue_type == 7: # to check if the first clue on the road is read
                                     self.first_clue = True
                                     self.last_clue = True
+                                    self.state_machine.move_pub.stop_publisher()
+                                    rospy.sleep(1)
 
                                 if clue_type == 8: # to check if the last clue on the road is read
                                     self.last_clue = True

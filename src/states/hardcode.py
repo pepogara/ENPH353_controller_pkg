@@ -29,6 +29,8 @@ class HardcodeDrivingState:
 
         self.clue_num = 0
 
+        self.last_clue = False
+
         self.model = ks.models.load_model("/home/fizzer/ros_ws/src/controller_pkg/nn_models/signNN_4.h5")
 
         self.integral = 0
@@ -80,8 +82,7 @@ class HardcodeDrivingState:
                 self.transition_to_substate("clue_board")
             
             else:
-                self.state_machine.move_pub.stop_publisher()
-                rospy.signal_shutdown("Done")
+                pass
                 
 
         elif self.current_substate == "teleport1":
@@ -110,16 +111,19 @@ class HardcodeDrivingState:
                             self.past_area = area
                         else:
                             self.hint_found = True
-                            if self.clue_num < 4:
-                                clue_type = self.type_detect(self.past_hint, "road")
-                            else:
-                                clue_type = self.type_detect(self.past_hint, "mountain")
-                            print(clue_type)
+                            clue_type = self.type_detect(self.past_hint)
+
                             if clue_type not in self.read_clues:
                                 clue = self.clue_detect(self.past_hint)
                                 self.read_clues.append(clue_type)
                                 self.clue_num += 1
                                 self.state_machine.score_pub.clue_publisher(clue, clue_type)
+
+                            if clue_type == 7:
+                                self.last_clue = True
+                                self.state_machine.move_pub.stop_publisher()
+                                rospy.sleep(0.5)
+
                     else:
                         self.past_hint = hint
                         self.past_area = area
@@ -153,7 +157,7 @@ class HardcodeDrivingState:
 
         return word
     
-    def type_detect(self, hint, state):
+    def type_detect(self, hint):
         """!
         @brief      Detects the type of clue in the clue board.
 
@@ -173,8 +177,16 @@ class HardcodeDrivingState:
 
         word = ''.join(decoded_chars).rstrip()
 
-        similar = self.state_machine.score_pub.most_similar_string(word, state)
+        similar = self.state_machine.score_pub.most_similar_string(word, "hardcode")
 
         index = self.state_machine.score_pub.all_clue_types.index(similar) + 1
 
         return index
+    
+    def done(self):
+        """!
+        @brief      Checks if the state is done.
+
+        @return     True if the state is done, False otherwise.
+        """
+        return self.last_clue
