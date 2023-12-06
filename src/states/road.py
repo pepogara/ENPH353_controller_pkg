@@ -20,6 +20,8 @@ class RoadDrivingState:
         """
         self.state_machine = state_machine
         self.current_substate = "pid"
+        self.next_substate = "pid"
+
         self.past_hint = None
         self.past_area = 0
         self.hint_found = False
@@ -38,7 +40,6 @@ class RoadDrivingState:
         self.Ki = 0.00
         self.Kd = 0.015
 
-
     def transition_to_substate(self, substate):
         """!
         @brief      Transition to a new substate.
@@ -56,9 +57,7 @@ class RoadDrivingState:
         if self.current_substate == "pid":
             lines = imgt.HSV(img, "road")
 
-            # imgt.HSV(img, "road")
-
-            self.state_machine.debug.publish(lines, "mono8")
+            # self.state_machine.debug.publish(lines, "mono8")
 
             center = self.state_machine.move_pub.center_of_road(lines)
             
@@ -87,6 +86,7 @@ class RoadDrivingState:
             hsv = imgt.HSV(img, "clue")
             hint, area = imgt.homography(hsv, img)
             if hint is not None:
+                self.state_machine.debug.publish(hint, "bgr8")
                 if (self.hint_found):
                     # self.state_machine.debug.publish(self.past_hint, "bgr8")
                     pass
@@ -103,7 +103,6 @@ class RoadDrivingState:
                                 clue = self.clue_detect(self.past_hint)
                                 self.read_clues.append(clue_type)
                                 self.state_machine.score_pub.clue_publisher(clue, clue_type)
-
                                 
                                 if clue_type == 4: # to check if the last clue on the road is read
                                     self.last_clue = True
@@ -119,7 +118,8 @@ class RoadDrivingState:
                 self.past_area = 0
                 # self.state_machine.debug.publish(img, "bgr8")
 
-            self.transition_to_substate("pid")
+            self.transition_to_substate(self.next_substate)
+
 
     def clue_detect(self, hint):
         """!
