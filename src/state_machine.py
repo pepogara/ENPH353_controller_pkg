@@ -49,7 +49,7 @@ class StateMachine():
         rospy.Timer(rospy.Duration(241), rospy.signal_shutdown, oneshot=True)
 
         self.backup = rospy.get_time()
-        self.RESTART_TIME = 75
+        self.RESTART_TIME = 80
 
         self.start_time = rospy.get_time()
 

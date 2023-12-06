@@ -25,7 +25,7 @@ class HardcodeDrivingState:
         self.past_area = 0
         self.hint_found = False
 
-        self.read_clues =[]
+        self.read_clues =[1]
 
         self.clue_num = 0
 

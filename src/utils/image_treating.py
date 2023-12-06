@@ -146,7 +146,7 @@ def homography(hsv, img):
     
     # ignores contours that are too small
     contourArea = cv.contourArea(largest_contour)
-    if contourArea < 15000: #changed from 20
+    if contourArea < 14000: #changed from 20
         # print("Hint too small")
         return None, 0
 
