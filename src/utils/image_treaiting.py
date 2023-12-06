@@ -6,7 +6,7 @@ import rospy
 import time
 
 
-def HSV(img, key, val = True):
+def HSV(img, key, val=True):
     """!
     @brief      Function to apply mask to image to isolate hints
 
@@ -14,37 +14,40 @@ def HSV(img, key, val = True):
     @param      key - string to indicate which mask to use
                 "road" - mask for road
                 "clue" - mask for clue
+                "off_road" - mask for off road
     @param      val - boolean to indicate if HSV values should be returned or not
 
     @return     mask - masked image
     """
 
-    img = cv.medianBlur(img,5)
+    img = cv.medianBlur(img, 5)
 
     # Convert BGR to HSV
     hsv = cv.cvtColor(img, cv.COLOR_BGR2HSV)
 
-    if key == "road":
-        uh = 255
-        us = 255
-        uv = 255
-        lh = 0
-        ls = 0
-        lv = 250
-    if key == "clue":
-        uh = 130
-        us = 255
-        uv = 204
-        lh = 118
-        ls = 50
-        lv = 75
-    if key == "off_road":
-        uh = 105
-        us = 83
-        uv = 237
-        lh = 0
-        ls = 0
-        lv = 179
+    hsv_values = {
+        "road": {
+            "upper": np.array([255, 255, 255]),
+            "lower": np.array([0, 0, 250])
+        },
+        "clue": {
+            "upper": np.array([130, 255, 204]),
+            "lower": np.array([118, 50, 75])
+        },
+        "off_road": {
+            "upper": np.array([105, 83, 237]),
+            "lower": np.array([0, 0, 179])
+        }
+    }
+
+    upper_hsv = hsv_values[key]["upper"]
+    lower_hsv = hsv_values[key]["lower"]
+
+    # Threshold the HSV image to get the mask
+    mask = cv.inRange(hsv, lower_hsv, upper_hsv)
+
+    if val:
+        return mask
 
     lower_hsv = np.array([lh,ls,lv])
     upper_hsv = np.array([uh,us,uv])

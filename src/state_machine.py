@@ -12,6 +12,7 @@ from utils.image_publisher import ImagePublisher
 
 from states.road import RoadDrivingState
 from states.off_road import OffRoadDrivingState
+from states.mountain import MountainDrivingState
 
 class StateMachine():
     """!
@@ -39,6 +40,7 @@ class StateMachine():
 
         self.road = RoadDrivingState(self)
         self.off_road = OffRoadDrivingState(self)
+        self.mountain = MountainDrivingState(self)
         
         rospy.Timer(rospy.Duration(2), self.execute, oneshot=True)
         rospy.Timer(rospy.Duration(241), rospy.signal_shutdown, oneshot=True)
@@ -83,14 +85,22 @@ class StateMachine():
                 self.off_road.execute()
 
                 if self.off_road.done():
-                    self.transition_to("idle")
+                    self.transition_to("mountain_teleport")
                 
-            elif self.current_state == "respawn":
-                pass
+            elif self.current_state == "mountain_teleport":
+
+                self.move_pub.teleport_to([-4.015, -2.299, 0.1, 0])
+                
+                self.transition_to("mountain")
+                
 
             elif self.current_state == "mountain":
-                pass
-    
+
+                self.mountain.execute()
+
+                if self.mountain.done():
+                    rospy.signal_shutdown("Done")
+                    
 
     def spin(self):
         """!

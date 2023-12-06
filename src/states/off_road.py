@@ -62,7 +62,7 @@ class OffRoadDrivingState:
             if center is not None:
                 error = img.shape[1] // 2 - center[0]
             else:
-                error = 75
+                error = 0
 
             self.integral += error
             derivative = error - self.previous_error
