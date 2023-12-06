@@ -106,7 +106,6 @@ class RoadDrivingState:
 
                                 
                                 if clue_type == 4: # to check if the last clue on the road is read
-                                    print("got the last clue")
                                     self.last_clue = True
                                     self.state_machine.move_pub.stop_publisher()
 
@@ -163,7 +162,7 @@ class RoadDrivingState:
 
         word = ''.join(decoded_chars).rstrip()
 
-        similar = self.state_machine.score_pub.most_similar_string(word)
+        similar = self.state_machine.score_pub.most_similar_string(word, "road")
 
         index = self.state_machine.score_pub.all_clue_types.index(similar) + 1
 
