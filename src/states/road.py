@@ -29,7 +29,7 @@ class RoadDrivingState:
 
         self.last_clue = False
 
-        self.model = ks.models.load_model("/home/fizzer/ros_ws/src/controller_pkg/nn_models/signNN_3.h5")
+        self.model = ks.models.load_model("/home/fizzer/ros_ws/src/controller_pkg/nn_models/signNN_4.h5")
 
         self.integral = 0
         self.previous_error = 0

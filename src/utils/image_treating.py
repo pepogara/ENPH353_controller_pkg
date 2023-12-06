@@ -37,7 +37,12 @@ def HSV(img, key, val=True):
         "off_road": {
             "upper": np.array([105, 83, 237]),
             "lower": np.array([0, 0, 179])
+        },
+        "mountain": {
+            "upper": np.array([35, 100, 232]),
+            "lower": np.array([0, 0, 155])
         }
+
     }
 
     upper_hsv = hsv_values[key]["upper"]
@@ -48,13 +53,13 @@ def HSV(img, key, val=True):
 
     if val:
         return mask
-
-    lower_hsv = np.array([lh,ls,lv])
-    upper_hsv = np.array([uh,us,uv])
-
-    # Threshold the HSV image to get only blue colors
-    mask = cv.inRange(hsv, lower_hsv, upper_hsv)
-    if val: return mask
+    
+    uh = upper_hsv[0]
+    us = upper_hsv[1]
+    uv = upper_hsv[2]
+    lh = lower_hsv[0]
+    ls = lower_hsv[1]
+    lv = lower_hsv[2]
 
     """Code for calibrating HSV values"""
     window_name = "HSV Calibrator"

@@ -5,7 +5,7 @@ import cv2
 
 from tensorflow import keras as ks
 
-import utils.image_treaiting as imgt
+import utils.image_treating as imgt
 
 
 class MountainDrivingState:
@@ -28,7 +28,7 @@ class MountainDrivingState:
 
         self.last_clue = False
 
-        self.model = ks.models.load_model("/home/fizzer/ros_ws/src/controller_pkg/nn_models/signNN_3.h5")
+        self.model = ks.models.load_model("/home/fizzer/ros_ws/src/controller_pkg/nn_models/signNN_4.h5")
 
         self.integral = 0
         self.previous_error = 0
@@ -77,6 +77,9 @@ class MountainDrivingState:
 
         elif self.current_substate == "tunnel":
             pass
+
+        elif self.current_substate == "backward_hard":
+            imgt.HSV(img, "off_road", False)
 
         elif self.current_substate == "clue_board":
             # Call the execute method of sub-state 4

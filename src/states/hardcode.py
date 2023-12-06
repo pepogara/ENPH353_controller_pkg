@@ -29,7 +29,7 @@ class HardcodeDrivingState:
 
         self.clue_num = 0
 
-        self.model = ks.models.load_model("/home/fizzer/ros_ws/src/controller_pkg/nn_models/signNN_3.h5")
+        self.model = ks.models.load_model("/home/fizzer/ros_ws/src/controller_pkg/nn_models/signNN_4.h5")
 
         self.integral = 0
         self.previous_error = 0
@@ -168,7 +168,7 @@ class HardcodeDrivingState:
 
         word = ''.join(decoded_chars).rstrip()
 
-        similar = self.state_machine.score_pub.most_similar_string(word)
+        similar = self.state_machine.score_pub.most_similar_string(word, "off_road")
 
         index = self.state_machine.score_pub.all_clue_types.index(similar) + 1
 
